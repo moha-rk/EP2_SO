@@ -1,31 +1,25 @@
+#include "ciclist.h"
+
+#define MAX_LENGTH 12345
+#define MAX_WIDTH 10
+
 #ifndef RACE_H
 #define RACE_H
 
-#include <pthread.h>
-#include <stdbool.h>
-
-#define VELODROMO_WIDTH 10 //maximo de 10 ciclistas lado a lado
-#define MAX_VELODROMO_LENGTH 1e5
-
 typedef struct trecho_struct
 {
-    int linha[10];
+    ciclist_ptr linha[MAX_WIDTH];
 } trecho;
 
 typedef trecho *trecho_ptr;
 
-int velodromo_length;
-int ciclists_number;
-//ou criar pista estaticamente
-trecho_ptr pista[MAX_VELODROMO_LENGTH];
-//ou alocar pista dinamicamente
-void create_pista();
+trecho_ptr pista[MAX_LENGTH]; //se necessario mudar para aloc dinamica
 
-//funcao para criar os ciclistas e definir suas posicoes iniciais
-void start_race();
+int time_interval, current_time;
+int velodromo_length, velodromo_width;
+int ciclists_number, running_ciclists;
 
-//funcao para contar o numero de ciclistas correndo
-int count_ciclists();
+void start_race(); //funcao para criar os ciclistas e definir configs iniciais
+void update_race();
 
-
-#endif  
+#endif

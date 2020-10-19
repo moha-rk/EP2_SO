@@ -4,18 +4,19 @@
 #include <stdbool.h>
 
 #define LOW_SPEED 1 / 120 //meters per milissecond == 30km/h
-#define AVG_SPEED 1 / 60 // == 60km/h
+#define AVG_SPEED 1 / 60  // == 60km/h
 #define HIGH_SPEED 1 / 40 // == 90km/h
 
 typedef struct ciclist_struct
 {
     int id;
+    bool running;
     double speed;
+    int laps;
     pthread_t thread;
-    struct ciclist_struct* next;
 } ciclist;
 
-typedef ciclist* ciclist_ptr;
+typedef ciclist *ciclist_ptr;
 
 ciclist_ptr create();
 void destroy(ciclist_ptr);
