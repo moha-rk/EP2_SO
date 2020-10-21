@@ -12,14 +12,15 @@ typedef struct ciclist_struct
     int id;
     bool running;
     double speed;
+    int x_pos, y_pos;
     int laps;
     pthread_t thread;
 } ciclist;
 
 typedef ciclist *ciclist_ptr;
 
-ciclist_ptr create();
+void create(int, int);
 void destroy(ciclist_ptr);
-void update(ciclist_ptr);
+void move_to(ciclist_ptr, int, int);
 
 #endif

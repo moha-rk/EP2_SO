@@ -2,7 +2,6 @@
 #include <string.h>
 #include "../libs/race.h"
 #include "../libs/ciclist.h"
-#include "../libs/simulation.h"
 
 int main(int argc, char **argv)
 {

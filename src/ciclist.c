@@ -3,21 +3,34 @@
 #include "../libs/race.h"
 #include "../libs/ciclist.h"
 
-ciclist_ptr create()
+void create(int x, int y)
 {
-    ciclist_ptr created = (ciclist_ptr)malloc(sizeof(ciclist));
-    created->id = running_ciclists++;
-    created->running = true;
-    created->speed = LOW_SPEED;
-    created->laps = 0;
-    return created;
+    ciclist_ptr c = (ciclist_ptr)malloc(sizeof(ciclist));
+    running_ciclists++;
+
+    c->id = running_ciclists;
+
+    c->running = true;
+    c->speed = LOW_SPEED;
+    c->laps = 0;
+    c->x_pos = x;
+    c->y_pos = y;
+
+    pista[x][y] = c->id;
+    ciclistas[c->id] = c;
 }
 
 void destroy(ciclist_ptr c)
 {
+    pista[c->x_pos][c->y_pos] = 0;
     running_ciclists--;
 }
 
-void update(ciclist_ptr c)
+void move_to(ciclist_ptr c, int x, int y)
 {
+    pista[c->x_pos][c->y_pos] = 0;
+
+    pista[x][y] = c->id;
+    c->x_pos = x;
+    c->y_pos = y;
 }
