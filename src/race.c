@@ -13,10 +13,10 @@ void start_race()
     running_ciclists = 0;
 
     int x_pos, y_pos;                                         //posicao de largada, que sera sorteada
-    int max_x = (int)ceil(ciclists_number / velodromo_width); //maximo x de largada
+    int max_x = (int)ceil(ciclists_number / velodromo_width) + 1; //maximo x de largada
     int max_y = velodromo_width;                              // maximo y de largada
 
-    while (running_ciclists <= ciclists_number)
+    while (running_ciclists < ciclists_number)
     {
         x_pos = rand() % max_x;
         y_pos = rand() % max_y;

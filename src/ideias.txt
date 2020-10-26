@@ -1,0 +1,29 @@
+Função run executada pela thread do ciclista. Atualizará a prórpia posição (variável interna) e verifica se terminou o metro atual para passar pro próximo (caso esteja liberado). Caso ocupado e com velocidade maior que o da frente, verifica se a faixa à direita esta livre para ultrapassagem.
+Para andar com a posição da frente ocupada, o ciclista primeiro verifica se tem alguém na sua frente, e se tiver, verifica se já andou naquela iteração. Se não andou, espera ele andar pra ver o que fazer, e se já andou, verifica se pode ultrapassar: se puder, ultrapassa, se não, fica preso atrás do ciclista.
+Dúvida 1: como numa atualização de 60 ms um ciclista a 30 km/h anda metade de um metro, ele deverá andar "metade" da sua posição? E se for assim, ele só pode andar essa metade se o ciclista da frente já tiver andado metade, já que cada ciclista ocupa 1 metro
+Resposta 1: não terá "meio metro". O ciclista deve segurar sua posição por 2 iterações e então passar para a próxima posição.
+Thread principal = coordenadora. Esta thread irá calcular o tempo, determinar o tempo entre iterações, dormir pelo tempo determinado. Também deverá conferir quais os ciclistas que terminaram em último lugar em voltas mútliplas de 2.
+Como guardar posições? Vetor prealocado de tamanho 2*n x n (Com certeza é o suficiente, pois max voltas = 2*(n-1))?
+
+- atualização de 60 em 60
+    60 km/h -> 1m = 6/6 por 60 ms
+    30 km/h -> 1/2m = 3/6 por 60 ms
+- atualização de 20 em 20
+    90 km/h -> 1/2m = 3/6 por 20 ms
+    60 km/h -> 1/3m = 2/6 por 20 ms
+    30 km/h -> 1/6m por 20 ms
+
+    v/(10*60/tempo) -> tempo = 60 => v/10
+    v/(10*60/tempo) -> tempo = 20 => v/30
+
+
+
+Caso simulado:
+
+^  1  2  3
+|  4  0  0
+
+v1 = 30 km/h
+v2 = 60 km/h
+v4 = 60 km/h
+Neste caso, v4 deve verificar a velocidade dos outros na fileira da frente pra tentar aproveitar sua velocidade alta? Ou só deve aceitar que 1 está a 30 e andar por essa iteração a 30, até que na próxima, a poisção onde estava 2 esteja livre para acontecer a ultrapassagem?

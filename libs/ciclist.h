@@ -3,9 +3,9 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define LOW_SPEED 1 / 120 //meters per milissecond == 30km/h
-#define AVG_SPEED 1 / 60  // == 60km/h
-#define HIGH_SPEED 1 / 40 // == 90km/h
+#define LOW_SPEED 30 //meters per milissecond == 30km/h
+#define AVG_SPEED 60  // == 60km/h
+#define HIGH_SPEED 90 // == 90km/h
 
 typedef struct ciclist_struct
 {
@@ -22,5 +22,7 @@ typedef ciclist *ciclist_ptr;
 void create(int, int);
 void destroy(ciclist_ptr);
 void move_to(ciclist_ptr, int, int);
+void *run(void *ciclist);
+void avanca_metro(ciclist_ptr c);
 
 #endif
