@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <pthread.h>
 #include "../libs/race.h"
 #include "../libs/ciclist.h"
+
+void show_pista();
 
 int main(int argc, char **argv)
 {
@@ -13,22 +17,14 @@ int main(int argc, char **argv)
 
     FILE *output = fopen("relatorio.txt", "w");
 
-    start_race(); //seta as condicoes iniciais
-
-    pthread_t c1;
-    if(pthread_create(&c1, NULL, run, ciclistas[1]) != 0)
-    {
-        //provisorio esse 1
-        fprintf(stderr, "erro na criação do ciclista %d\n", 1);
-        return 0;
-    }
+    start_race(); //seta as condicoes iniciais e cria os ciclistas
 
     while (running_ciclists > 0)
     {
         current_time += time_interval;
-        //update_race();
-        show_pista();
+        update_race();
         usleep(1000*time_interval);
+        show_pista();
     }
 
     return 0;

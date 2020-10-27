@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include "../libs/race.h"
 #include "../libs/ciclist.h"
@@ -15,6 +16,12 @@ void start_race()
     int x_pos, y_pos;                                         //posicao de largada, que sera sorteada
     int max_x = (int)ceil(ciclists_number / velodromo_width) + 1; //maximo x de largada
     int max_y = velodromo_width;                              // maximo y de largada
+    int i;
+    for (i = 0; i < MAX_LENGTH-1; i++)
+    {
+        cont[i] = 0;
+        arrive[i] = 1;
+    }
 
     while (running_ciclists < ciclists_number)
     {
@@ -33,10 +40,19 @@ void start_race()
     velodromo_width = 10; //maximo de 10 ciclistas lado a lado depois do inicio
 }
 
-void update_race()
+void update_race() //Update race deverá servir para coordenar o andamento dos ciclistas
 {
     ciclist_ptr c;
-    int vel, dist;
+    int vel, dist, i;
+
+        for (i = 0; i < running_ciclists; i++)
+        {
+            while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
+            arrive[i] = 0;
+        }
+        for (i = 0; i < running_ciclists; i++) cont[i] = 1;
+
+    /*
 
     for (int i = velodromo_length - 1; i >= 0; i--)
     {
@@ -57,5 +73,16 @@ void update_race()
 
             dist = (c->speed) * time_interval; //checar problemas de arredondamento (int = double*int)
         }
-    }
+        
+    }*/
+
+    /*Thread Coordinator {
+        while (true) {
+            for [i = 1 to n] {
+                while (arrive[i] == 0) skip;
+                arrive[i] = 0;
+            }
+            for [i = 1 to n] continue[i] = 1;
+        }
+    }*/
 }

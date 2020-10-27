@@ -12,6 +12,7 @@ ciclist_ptr ciclistas[MAX_LENGTH]; //vetor para guardar ciclistas por ordem de i
 int time_interval, current_time;
 int velodromo_length, velodromo_width;
 int ciclists_number, running_ciclists;
+int arrive[MAX_LENGTH], cont[MAX_LENGTH]; //se necessario mudar para aloc dinamica
 
 void start_race(); //funcao para criar os ciclistas e definir configs iniciais
 void update_race();
