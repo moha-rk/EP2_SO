@@ -23,8 +23,12 @@ void start_race()
         arrive[i] = 1;
     }
 
+    int linha_atual = 0;
+    int n_ciclistas_linha = 0;
     while (running_ciclists < ciclists_number)
     {
+
+        /* Por enquanto fica comentado por falta de proteção da pista, esta causando erros
         x_pos = rand() % max_x;
         y_pos = rand() % max_y;
 
@@ -33,8 +37,17 @@ void start_race()
             x_pos = (x_pos + 1) % max_x;
             y_pos = (y_pos + 1) % max_y;
         }
+        */
+        x_pos = linha_atual;
+        y_pos = n_ciclistas_linha;
 
         create(x_pos, y_pos);
+        n_ciclistas_linha++;
+        if (n_ciclistas_linha == 5) {
+            n_ciclistas_linha = 0;
+            linha_atual--;
+            if (linha_atual < 0) linha_atual = velodromo_length-1;
+        }
     }
 
     velodromo_width = 10; //maximo de 10 ciclistas lado a lado depois do inicio

@@ -21,10 +21,10 @@ int main(int argc, char **argv)
 
     while (running_ciclists > 0)
     {
+        show_pista();
         current_time += time_interval;
         update_race();
         usleep(1000*time_interval);
-        show_pista();
     }
 
     return 0;
