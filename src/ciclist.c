@@ -128,9 +128,6 @@ int espaco_frente(int x)
 
 void atualiza_velocidade(ciclist_ptr c)
 {
-    /* 30Km/h, o sorteio e feito com 80% de chance de escolher 60Km/h ´
-e 20% de chance de escolher 30Km/h. Caso a volta anterior tenha sido feita a 60Km/h, o sorteio e feito ´
-com 40% de chance de escolher 30Km/h e 60% de chance de escolher 60Km/h*/
     if (c->speed == LOW_SPEED && rand()%100 < 80)
         c->speed = AVG_SPEED;
 

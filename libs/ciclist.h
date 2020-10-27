@@ -25,6 +25,7 @@ void move_to(ciclist_ptr, int, int);
 void *run(void *ciclist);
 bool avanca_metro(ciclist_ptr c);
 bool espaco_lado(int x);
+int espaco_frente(int x);
 void atualiza_velocidade(ciclist_ptr c);
 
 #endif
