@@ -58,8 +58,14 @@ void *run(void *ciclist)
         if (sixthMeter == 6){
             //fprintf(stderr, "metro completo");
             /*Codigo para passar para a próxima faixa*/
-            avanca_metro(c);
-            sixthMeter = 0;
+            if (avanca_metro(c))
+            {
+                sixthMeter = 0;
+                if (c->x_pos == 0){
+                    c->laps++;
+                    atualiza_velocidade(c);
+                }
+            }
         }
         /*
         arrive[i] = 1;
@@ -72,7 +78,7 @@ void *run(void *ciclist)
 
 }
 
-void avanca_metro(ciclist_ptr c)
+bool avanca_metro(ciclist_ptr c)
 {
     //Adicionar conferencia de volta completa
     //Adicionar mutex para proteger posições da pista
@@ -81,10 +87,53 @@ void avanca_metro(ciclist_ptr c)
         pista[c->x_pos][c->y_pos] = 0;
         pista[(c->x_pos+1)%velodromo_length][c->y_pos] = c->id;
         c->x_pos = (c->x_pos+1)%velodromo_length;
+        return true;
     }
+    else
+    {
+        int y_front;
+        //Ultrapassagem vagabundinha
+        if (espaco_lado(c->x_pos) && (y_front = espaco_frente(c->x_pos)) != -1)
+        {
+            pista[c->x_pos][c->y_pos] = 0;
+            pista[(c->x_pos+1)%velodromo_length][y_front] = c->id;
+            c->x_pos = (c->x_pos+1)%velodromo_length;
+            return true;
+        }
+    }
+    return false;
+    
 }
 
-int confere_espaco_a_frente()
+bool espaco_lado(int x)
 {
+    for (int i = 0; i < velodromo_length; i++)
+    {
+        //Mutex para conferir se tem alguém do lado
+        if (pista[x][i] == 0) return true;
+    }
+    return false;
+}
 
+int espaco_frente(int x)
+{
+    int x_front = (x+1)%velodromo_length;
+    for (int i = 0; i < velodromo_length; i++)
+    {
+        //Mutex para conferir se tem alguém do lado
+        if (pista[x_front][i] == 0) return i;
+    }
+    return -1;
+}
+
+void atualiza_velocidade(ciclist_ptr c)
+{
+    /* 30Km/h, o sorteio e feito com 80% de chance de escolher 60Km/h ´
+e 20% de chance de escolher 30Km/h. Caso a volta anterior tenha sido feita a 60Km/h, o sorteio e feito ´
+com 40% de chance de escolher 30Km/h e 60% de chance de escolher 60Km/h*/
+    if (c->speed == LOW_SPEED && rand()%100 < 80)
+        c->speed = AVG_SPEED;
+
+    else if (c->speed == AVG_SPEED && rand()%100 < 40)
+        c->speed = LOW_SPEED;
 }

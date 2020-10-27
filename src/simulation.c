@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 void show_pista()
 {
-    for (int j = 0; j < velodromo_width-1; j++){
+    for (int j = 0; j < velodromo_width; j++){
         for (int i = 0; i < velodromo_length; i++){
             printf("%d  ", pista[i][j]);
         }

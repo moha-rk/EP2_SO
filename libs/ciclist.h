@@ -23,6 +23,8 @@ void create(int, int);
 void destroy(ciclist_ptr);
 void move_to(ciclist_ptr, int, int);
 void *run(void *ciclist);
-void avanca_metro(ciclist_ptr c);
+bool avanca_metro(ciclist_ptr c);
+bool espaco_lado(int x);
+void atualiza_velocidade(ciclist_ptr c);
 
 #endif
