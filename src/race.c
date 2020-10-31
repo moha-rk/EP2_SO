@@ -12,6 +12,7 @@ void start_race()
     time_interval = 60;  //milissegundos
     velodromo_width = 5; //maximo de 5 ciclistas lado a lado no inicio
     running_ciclists = 0;
+    pthread_mutex_init(&nCiclistMutex, NULL);
 
     int x_pos, y_pos;                                         //posicao de largada, que sera sorteada
     int max_x = (int)ceil(ciclists_number / velodromo_width) + 1; //maximo x de largada
@@ -61,6 +62,14 @@ void start_race()
             pthread_mutex_init(&pistaMutex[i][j], NULL);
         }
     }
+
+    for (i = 0; i < MAX_LENGTH*2; i++)
+    {
+        for (int j = 0; j < MAX_LENGTH; j++)
+        {
+            placar[i][j] = 0;
+        }
+    }
 }
 
 void update_race() //Update race deverá servir para coordenar o andamento dos ciclistas
@@ -68,44 +77,40 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
     ciclist_ptr c;
     int vel, dist, i;
 
-        for (i = 0; i < running_ciclists; i++)
-        {
-            while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
-            arrive[i] = 0;
-        }
-        for (i = 0; i < running_ciclists; i++) cont[i] = 1;
-
-    /*
-
-    for (int i = velodromo_length - 1; i >= 0; i--)
+    for (i = 0; i < ciclists_number; i++)
     {
-        for (int j = velodromo_width - 1; j >= 0; j--)
-        {
-            if (pista[i][j] == 0)
-                continue;
+        if (ciclistas[i+1] == NULL) continue;
+        while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
+        arrive[i] = 0;
+    }
+    //Aqui a execução está pausada, todos os ciclistas esperam pelo continue
+    //O ideal seria contabilizar voltas aqui, e eliminar quem deve ser eliminado
+    //Claro, também sortear a nova velocidade na ultima volta
 
-            c = ciclistas[pista[i][j]];
 
-            vel = rand() % 3; // 3 tipos de velocidade possiveis
-            if (vel == 0)
-                c->speed = LOW_SPEED;
-            else if (vel == 1)
-                c->speed = AVG_SPEED;
-            else
-                c->speed = HIGH_SPEED;
+    atualiza_placar();
+    verifica_perdedores();
 
-            dist = (c->speed) * time_interval; //checar problemas de arredondamento (int = double*int)
-        }
-        
-    }*/
+    for (i = 0; i < ciclists_number; i++) cont[i] = 1;
+}
 
-    /*Thread Coordinator {
-        while (true) {
-            for [i = 1 to n] {
-                while (arrive[i] == 0) skip;
-                arrive[i] = 0;
-            }
-            for [i = 1 to n] continue[i] = 1;
-        }
-    }*/
+//Esta função confere ao fim de cada iteração se um ciclista acabou uma volta e então o coloca no placar daquela volta
+void atualiza_placar()
+{
+    for (int i = 0; i <= ciclists_number; i++)
+    {
+        if (ciclistas[i] == NULL) continue;
+        if (!ciclistas[i]->finishedLap) continue;
+        ciclistas[i]->finishedLap = false;
+
+        int j = 0;
+        while (placar[ciclistas[i]->laps][j] != 0) j++;
+        placar[ciclistas[i]->laps][j] = ciclistas[i]->id;
+    }
+
+}
+
+void verifica_perdedores()
+{
+
 }

@@ -15,6 +15,7 @@ void create(int x, int y)
     c->running = true;
     c->speed = LOW_SPEED;
     c->laps = 0;
+    c->finishedLap = false;
     c->x_pos = x;
     c->y_pos = y;
     if(pthread_create(&c->thread, NULL, run, c) != 0)
@@ -30,8 +31,17 @@ void create(int x, int y)
 
 void destroy(ciclist_ptr c)
 {
+    pthread_mutex_lock(&pistaMutex[c->x_pos][c->y_pos]);
     pista[c->x_pos][c->y_pos] = 0;
+    pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
+
+    pthread_mutex_lock(&nCiclistMutex);
     running_ciclists--;
+    pthread_mutex_unlock(&nCiclistMutex);
+
+    pthread_mutex_destroy(&c->mArrive);
+    ciclistas[c->id] = NULL;
+    free(c);
 }
 
 void move_to(ciclist_ptr c, int x, int y)
@@ -54,16 +64,19 @@ void *run(void *ciclist)
         cont[c->id-1] = 0;
         
         sixthMeter += c->speed*time_interval/600;
-        //fprintf(stderr, "\nandou %d m ciclista%d\n", sixthMeter, c->id);
         if (sixthMeter == 6){
-            //fprintf(stderr, "metro completo");
             /*Codigo para passar para a próxima faixa*/
             if (avanca_metro(c))
             {
                 sixthMeter = 0;
                 if (c->x_pos == 0){
                     c->laps++;
-                    if (c->laps > 0) atualiza_velocidade(c);
+                    if (c->laps > 0) 
+                    {
+                        if (quebrou(c)) pthread_exit(NULL);
+                        c->finishedLap = true;
+                        atualiza_velocidade(c);
+                    }
                 }
             }
 
@@ -132,7 +145,7 @@ bool avanca_metro(ciclist_ptr c)
         //Ultrapassagem vagabundinha
         if (espaco_lado(c->x_pos, c->y_pos) && (y_front = espaco_frente(c->x_pos, c->y_pos)) != -1)
         {
-            fprintf(stderr, "ultrapassou\n");
+            //fprintf(stderr, "ultrapassou\n");
             int xAnt = c->x_pos;
             int yAnt = c->y_pos;
             move_to(c, x_front, y_front);
@@ -193,4 +206,26 @@ void atualiza_velocidade(ciclist_ptr c)
 
     else if (c->speed == AVG_SPEED && rand()%100 < 40)
         c->speed = LOW_SPEED;
+}
+
+bool quebrou(ciclist_ptr c)
+{
+    if (c->laps % 6 != 0) return false;
+
+    pthread_mutex_lock(&nCiclistMutex);
+    if (running_ciclists <= 5)
+    {
+        pthread_mutex_unlock(&nCiclistMutex);
+        return false;
+    }
+    pthread_mutex_unlock(&nCiclistMutex);
+
+    if (rand()%100 < 5)
+    {
+        fprintf(stderr, "O ciclista %d quebrou após %d voltas\n", c->id, c->laps);
+        destroy(c);
+        return true;
+    }
+    return false;
+
 }
