@@ -175,6 +175,7 @@ int espaco_frente(int x, int y)
     {
         //Como poderíamos ter deadlock aqui?
         //pthread_mutex_lock(&pistaMutex[x_front][i]);
+        //Não sei se precisa ser trylock, aparentemente não da deadlock com lock normal
         if (pthread_mutex_trylock(&pistaMutex[x_front][i]) == 0)
         {
             idAtual = pista[x_front][i];
