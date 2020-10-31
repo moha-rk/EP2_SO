@@ -22,6 +22,7 @@ void create(int x, int y)
         fprintf(stderr, "erro na criação do ciclista %d\n", c->id);
         exit (EXIT_FAILURE);
     }
+    pthread_mutex_init(&c->mArrive, NULL);
 
     pista[x][y] = c->id;
     ciclistas[c->id] = c;
@@ -51,7 +52,6 @@ void *run(void *ciclist)
     while (running) {
         while (cont[c->id-1] == 0) usleep(10); //Quantia de sleep apenas para testes
         cont[c->id-1] = 0;
-        fprintf(stderr, "meu id é %d\n", c->id);
         
         sixthMeter += c->speed*time_interval/600;
         if (sixthMeter == 6){
@@ -65,8 +65,12 @@ void *run(void *ciclist)
                     if (c->laps > 0) atualiza_velocidade(c);
                 }
             }
+
         }
+        //Posso usar o próprio arrive para saber se determinado ciclista já andou. Só preciso proteger esse arive com um mutex
+        pthread_mutex_lock(&c->mArrive);
         arrive[c->id-1] = 1;
+        pthread_mutex_unlock(&c->mArrive);
     }
 
 
@@ -74,35 +78,60 @@ void *run(void *ciclist)
 
 bool avanca_metro(ciclist_ptr c)
 {
-    //Adicionar conferencia de volta completa
-    /*Evitando o deadlock: ao travar o da sua frente, caso esteja vazio, terá que travar o seu também para zerá-lo e mover para o da frente.
-    
+    /*    
     Primeiro travo o meu mutex, depois o da frente (posso pensar em usar o trylock)*/
+    int x_front = (c->x_pos+1)%velodromo_length;
     
     pthread_mutex_lock(&pistaMutex[c->x_pos][c->y_pos]);
-    pthread_mutex_lock(&pistaMutex[(c->x_pos+1)%velodromo_length][c->y_pos]);
-    int idAtual = pista[(c->x_pos+1)%velodromo_length][c->y_pos];
-    if (idAtual == 0)
+    pthread_mutex_lock(&pistaMutex[x_front][c->y_pos]);
+    int idAFrente = pista[x_front][c->y_pos];
+    if (idAFrente == 0)
     {
-        pista[c->x_pos][c->y_pos] = 0;
+        int xAnt = c->x_pos;
+        move_to(c, x_front, c->y_pos);
+        pthread_mutex_unlock(&pistaMutex[xAnt][c->y_pos]);
         pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
-        pista[(c->x_pos+1)%velodromo_length][c->y_pos] = c->id;
-        pthread_mutex_unlock(&pistaMutex[(c->x_pos+1)%velodromo_length][c->y_pos]);
-        c->x_pos = (c->x_pos+1)%velodromo_length;
         return true;
     }
     else
     {
-        pthread_mutex_unlock(&pistaMutex[(c->x_pos+1)%velodromo_length][c->y_pos]);
+        pthread_mutex_lock(&ciclistas[idAFrente]->mArrive);
+        int andou = arrive[idAFrente-1];
+        pthread_mutex_unlock(&ciclistas[idAFrente]->mArrive);
+
+        if (andou == 0) 
+        {
+            pthread_mutex_unlock(&pistaMutex[x_front][c->y_pos]);
+        
+            //Espera ocupada
+            while (andou == 0)
+            {
+                pthread_mutex_lock(&ciclistas[idAFrente]->mArrive);
+                andou = arrive[idAFrente-1];
+                pthread_mutex_unlock(&ciclistas[idAFrente]->mArrive);
+            }
+
+            pthread_mutex_lock(&pistaMutex[x_front][c->y_pos]);
+        }
+        idAFrente = pista[x_front][c->y_pos];
+        if (idAFrente == 0)
+        {
+            int xAnt = c->x_pos;
+            move_to(c, x_front, c->y_pos);
+            pthread_mutex_unlock(&pistaMutex[xAnt][c->y_pos]);
+            pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
+            return true;
+        }
+        
         int y_front;
         //Ultrapassagem vagabundinha
-        if (espaco_lado(c->x_pos) && (y_front = espaco_frente(c->x_pos)) != -1)
+        if (espaco_lado(c->x_pos, c->y_pos) && (y_front = espaco_frente(c->x_pos, c->y_pos)) != -1)
         {
             fprintf(stderr, "ultrapassou\n");
             pista[c->x_pos][c->y_pos] = 0;
             pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
             pista[(c->x_pos+1)%velodromo_length][y_front] = c->id;
-            pthread_mutex_unlock(&pistaMutex[(c->x_pos+1)%velodromo_length][y_front]);
+            pthread_mutex_unlock(&pistaMutex[x_front][y_front]);
             c->x_pos = (c->x_pos+1)%velodromo_length;
             return true;
         }
@@ -112,13 +141,13 @@ bool avanca_metro(ciclist_ptr c)
     
 }
 
-bool espaco_lado(int x)
+bool espaco_lado(int x, int y)
 {
     int idAtual;
-    for (int i = 0; i < velodromo_length; i++)
+    for (int i = y; i < velodromo_length; i++)
     {
         //Mutex para conferir se tem alguém do lado
-                fprintf(stderr, "procurando espaço ao lado\n");
+        fprintf(stderr, "procurando espaço ao lado\n");
 
         //pthread_mutex_lock(&pistaMutex[x][i]);
         if (pthread_mutex_trylock(&pistaMutex[x][i]) == 0)
@@ -135,7 +164,7 @@ bool espaco_lado(int x)
     return false;
 }
 
-int espaco_frente(int x)
+int espaco_frente(int x, int y)
 {
     int x_front = (x+1)%velodromo_length;
     int idAtual;
