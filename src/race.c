@@ -42,6 +42,8 @@ void start_race()
         y_pos = n_ciclistas_linha;
 
         create(x_pos, y_pos);
+        if (linha_atual != 0)
+            ciclistas[running_ciclists]->laps = -1;
         n_ciclistas_linha++;
         if (n_ciclistas_linha == 5) {
             n_ciclistas_linha = 0;
@@ -51,6 +53,14 @@ void start_race()
     }
 
     velodromo_width = 10; //maximo de 10 ciclistas lado a lado depois do inicio
+
+    for (i = 0; i < velodromo_length; i++)
+    {
+        for (int j = 0; j < velodromo_width; j++)
+        {
+            pthread_mutex_init(&pistaMutex[i][j], NULL);
+        }
+    }
 }
 
 void update_race() //Update race deverá servir para coordenar o andamento dos ciclistas

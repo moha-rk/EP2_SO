@@ -1,4 +1,5 @@
 #include "ciclist.h"
+#include <pthread.h>
 
 #define MAX_LENGTH 12345
 #define MAX_WIDTH 10
@@ -13,6 +14,7 @@ int time_interval, current_time;
 int velodromo_length, velodromo_width;
 int ciclists_number, running_ciclists;
 int arrive[MAX_LENGTH], cont[MAX_LENGTH]; //se necessario mudar para aloc dinamica
+pthread_mutex_t pistaMutex[MAX_LENGTH][MAX_WIDTH];
 
 void start_race(); //funcao para criar os ciclistas e definir configs iniciais
 void update_race();
