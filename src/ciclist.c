@@ -54,6 +54,7 @@ void *run(void *ciclist)
         cont[c->id-1] = 0;
         
         sixthMeter += c->speed*time_interval/600;
+        //fprintf(stderr, "\nandou %d m ciclista%d\n", sixthMeter, c->id);
         if (sixthMeter == 6){
             //fprintf(stderr, "metro completo");
             /*Codigo para passar para a próxima faixa*/
@@ -67,6 +68,7 @@ void *run(void *ciclist)
             }
 
         }
+        //fprintf(stderr, "saiu ciclista%d\n", c->id);
         //Posso usar o próprio arrive para saber se determinado ciclista já andou. Só preciso proteger esse arive com um mutex
         pthread_mutex_lock(&c->mArrive);
         arrive[c->id-1] = 1;
@@ -124,7 +126,7 @@ bool avanca_metro(ciclist_ptr c)
         }
         
         //Ciclista na frente que já andou, libero o mutex
-        pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
+        pthread_mutex_unlock(&pistaMutex[x_front][c->y_pos]);
 
         int y_front;
         //Ultrapassagem vagabundinha
@@ -172,10 +174,13 @@ int espaco_frente(int x, int y)
     for (int i = y; i < velodromo_length; i++)
     {
         //Como poderíamos ter deadlock aqui?
-        pthread_mutex_lock(&pistaMutex[x_front][i]);
-        idAtual = pista[x_front][i];
-        if (idAtual == 0) return i;
-        pthread_mutex_unlock(&pistaMutex[x_front][i]);
+        //pthread_mutex_lock(&pistaMutex[x_front][i]);
+        if (pthread_mutex_trylock(&pistaMutex[x_front][i]) == 0)
+        {
+            idAtual = pista[x_front][i];
+            if (idAtual == 0) return i;
+            pthread_mutex_unlock(&pistaMutex[x_front][i]);
+        }
     }
     return -1;
 }
