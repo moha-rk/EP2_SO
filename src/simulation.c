@@ -8,10 +8,12 @@
 
 void show_pista();
 
+static void show_help(char *programName);
+
 int main(int argc, char **argv)
 {
     if (argc != 3)
-        return 0;
+        show_help(argv[0]);
     velodromo_length = atoi(argv[1]);
     ciclists_number = atoi(argv[2]);
 
@@ -34,9 +36,19 @@ void show_pista()
 {
     for (int j = 0; j < velodromo_width; j++){
         for (int i = 0; i < velodromo_length; i++){
-            printf("%d  ", pista[i][j]);
+            fprintf(stderr, "%d  ", pista[i][j]);
         }
-        printf("\n");
+        fprintf(stderr, "\n");
     }
-    printf("\n\n");
+    fprintf(stderr, "\n\n");
+}
+
+
+static void show_help(char *programName)
+{
+    fprintf(stderr, "%s: Uso \n"
+                    "prompt> %s tamanho-do-velodromo ciclistas\n"
+                    ,
+            programName, programName);
+    exit (EXIT_FAILURE);
 }
