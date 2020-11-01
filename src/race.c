@@ -8,6 +8,31 @@
 
 void start_race()
 {
+    int i, j;
+
+    /*ALOCAÇÃO DE MEMÓRIA PARA TODAS AS LISTAS*/
+
+    pista = (int **) malloc(velodromo_length*sizeof(int *));
+    pistaMutex = (pthread_mutex_t **) malloc(velodromo_length*sizeof(pthread_mutex_t *));
+
+    for (i = 0; i < velodromo_length; i++)
+    {
+        pista[i] = (int *) calloc(MAX_WIDTH, sizeof(int));
+        pistaMutex[i] = (pthread_mutex_t *) malloc(MAX_WIDTH*sizeof(pthread_mutex_t));
+    }
+
+    ciclistas = (ciclist_ptr *) malloc((ciclists_number+1)*sizeof(ciclist_ptr));
+
+    placar = (int **) malloc(2*ciclists_number*sizeof(int *));
+    for (i = 0; i < 2*ciclists_number; i++)
+    {
+        placar[i] = (int *) calloc(ciclists_number+1, sizeof(int));
+    }
+
+    arrive = (int *) malloc(ciclists_number*sizeof(int));
+    cont = (int *) malloc(ciclists_number*sizeof(int));
+
+
     current_time = 0;    //tempo atual, em milissegundos
     time_interval = 60;  //milissegundos
     velodromo_width = 5; //maximo de 5 ciclistas lado a lado no inicio
@@ -17,8 +42,7 @@ void start_race()
     int x_pos, y_pos;                                         //posicao de largada, que sera sorteada
     int max_x = (int)ceil(ciclists_number / velodromo_width) + 1; //maximo x de largada
     int max_y = velodromo_width;                              // maximo y de largada
-    int i;
-    for (i = 0; i < MAX_LENGTH-1; i++)
+    for (i = 0; i < ciclists_number; i++)
     {
         cont[i] = 0;
         arrive[i] = 1;
@@ -28,17 +52,6 @@ void start_race()
     int n_ciclistas_linha = 0;
     while (running_ciclists < ciclists_number)
     {
-
-        /* Por enquanto fica comentado por falta de proteção da pista, esta causando erros
-        x_pos = rand() % max_x;
-        y_pos = rand() % max_y;
-
-        while (pista[x_pos][y_pos] != 0)
-        {
-            x_pos = (x_pos + 1) % max_x;
-            y_pos = (y_pos + 1) % max_y;
-        }
-        */
         x_pos = linha_atual;
         y_pos = n_ciclistas_linha;
 
@@ -57,15 +70,15 @@ void start_race()
 
     for (i = 0; i < velodromo_length; i++)
     {
-        for (int j = 0; j < velodromo_width; j++)
+        for (j = 0; j < velodromo_width; j++)
         {
             pthread_mutex_init(&pistaMutex[i][j], NULL);
         }
     }
 
-    for (i = 0; i < MAX_LENGTH*2; i++)
+    for (i = 0; i < ciclists_number*2; i++)
     {
-        for (int j = 0; j < MAX_LENGTH; j++)
+        for (j = 0; j <= ciclists_number; j++)
         {
             placar[i][j] = 0;
         }
@@ -97,16 +110,19 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
 //Esta função confere ao fim de cada iteração se um ciclista acabou uma volta e então o coloca no placar daquela volta
 void atualiza_placar()
 {
-    for (int i = 0; i <= ciclists_number; i++)
+    for (int i = 1; i <= ciclists_number; i++)
     {
         if (ciclistas[i] == NULL) continue;
         if (!ciclistas[i]->finishedLap) continue;
         ciclistas[i]->finishedLap = false;
 
         int j = 0;
+
         while (placar[ciclistas[i]->laps][j] != 0) j++;
+        
         placar[ciclistas[i]->laps][j] = ciclistas[i]->id;
     }
+
 
 }
 

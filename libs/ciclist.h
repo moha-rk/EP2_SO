@@ -11,7 +11,7 @@ typedef struct ciclist_struct
 {
     int id;
     bool running;
-    double speed;
+    int speed;
     int x_pos, y_pos;
     int laps;
     bool finishedLap;
