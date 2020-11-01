@@ -112,5 +112,8 @@ void atualiza_placar()
 
 void verifica_perdedores()
 {
-
+    //Primeira posição dos vetores de placar corresponderá à quantia de ciclistas que competem naquela volta. 
+    //Toda vez que um ciclista é eliminado, este número é subtraído por 1 nos vetores das voltas seguintes à
+    //volta em que este ciclista estava. Caso tenha quebrado, o cilista não completou a volta e deve subtrair
+    //da volta atual dele também.
 }
