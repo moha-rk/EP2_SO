@@ -7,6 +7,7 @@
 #include "../libs/ciclist.h"
 
 void show_pista();
+void print_placar();
 
 static void show_help(char *programName);
 
@@ -29,11 +30,16 @@ int main(int argc, char **argv)
         usleep(1000*time_interval);
     }
 
+    print_placar();
+
+
+    fclose(output);
     return 0;
 }
 
 void show_pista()
 {
+    fprintf(stderr, "running ciclists = %d\n", running_ciclists);
     for (int j = 0; j < velodromo_width; j++){
         for (int i = 0; i < velodromo_length; i++){
             fprintf(stderr, "%d  ", pista[i][j]);
@@ -51,4 +57,17 @@ static void show_help(char *programName)
                     ,
             programName, programName);
     exit (EXIT_FAILURE);
+}
+
+void print_placar()
+{
+    for (int i = 1; i <= 2*ciclists_number; i++)
+    {
+        fprintf(stderr, "Volta %d:\n", i);
+        for (int j = 0; j <= ciclists_number; j++)
+        {
+            fprintf(stderr, "%d ", placar[i][j]);
+        }
+        fprintf(stderr, "\n\n");
+    }
 }

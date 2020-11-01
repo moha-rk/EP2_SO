@@ -78,7 +78,10 @@ void *run(void *ciclist)
                             pthread_mutex_lock(&mutexPlacar);
                             for (int i = c->laps; i <= 2*ciclists_number; i++) placar[i][0]--;
                             pthread_mutex_unlock(&mutexPlacar);
-                            
+                            pthread_mutex_lock(&mutexUL);
+                            ultimaLap -= 2; //A quebra de um ciclista faz com que a ultima volta aconteça mais cedo
+                            pthread_mutex_unlock(&mutexUL);
+
                             pthread_exit(NULL);
                         }
                         c->finishedLap = true;

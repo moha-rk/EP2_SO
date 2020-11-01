@@ -36,6 +36,7 @@ void start_race()
     /*INICIALIZAÇÃO DOS MUTEX*/
 
     pthread_mutex_init(&mutexPlacar, NULL);
+    pthread_mutex_init(&mutexUL, NULL);
     pthread_mutex_init(&nCiclistMutex, NULL);
     for (i = 0; i < velodromo_length; i++)
     {
@@ -52,10 +53,14 @@ void start_race()
     velodromo_width = 5; //maximo de 5 ciclistas lado a lado no inicio
     running_ciclists = 0;
     lapAtual = 1;
+    ultimaLap = 2*(ciclists_number-1);
+    acelerado = -1;
 
     int x_pos, y_pos;                                         //posicao de largada, que sera sorteada
     int max_x = (int)ceil(ciclists_number / velodromo_width) + 1; //maximo x de largada
     int max_y = velodromo_width;                              // maximo y de largada
+
+    /*CRIAÇÃO E POSICIONAMENTO DOS CICLISTAS*/
 
     int linha_atual = 0;
     int n_ciclistas_linha = 0;
@@ -105,6 +110,8 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
 
     atualiza_placar();
     verifica_perdedores();
+    acelera_ultimas_voltas();
+    para_ciclistas();
 
     for (i = 0; i < ciclists_number; i++) cont[i] = 1;
 }
@@ -114,6 +121,7 @@ void atualiza_placar()
 {
     for (int i = 1; i <= ciclists_number; i++)
     {
+        //Mudar aqui pois não está aleatorio, o ciclista de menor id chega primeiro
         if (ciclistas[i] == NULL) continue;
         if (!ciclistas[i]->finishedLap) continue;
         ciclistas[i]->finishedLap = false;
@@ -148,5 +156,51 @@ void verifica_perdedores()
             for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
         }
         lapAtual++;
+    }
+}
+
+void para_ciclistas()
+{
+    for (int i = 2*ciclists_number; i >= ultimaLap; i--)
+    {
+        for (int j = 1; j <= ciclists_number; j++)
+        {
+            int idAtual = placar[i][j];
+            //Se ninguem completou a ultima volta
+            if (idAtual == 0) continue;
+            //Se chegou aqui, alguém completou
+            ciclistas[idAtual]->speed = 0;
+            running_ciclists--;
+        }
+    }
+}
+
+void acelera_ultimas_voltas()
+{
+    if (acelerado == 0) return;
+    if (acelerado == 1)
+    {
+        if (placar[ultimaLap-2][2] != 0)
+        {
+            ciclistas[placar[ultimaLap-2][2]]->speed = HIGH_SPEED;
+            acelerado = 0;
+            time_interval = 20;
+            return;
+        }
+    }
+    
+    if (placar[ultimaLap-2][1] != 0)
+    {
+        if (rand() % 100 < 10)
+        {
+            if (rand() % 100 < 50)
+            {
+                ciclistas[placar[ultimaLap-2][1]]->speed = HIGH_SPEED;
+                acelerado = 0;
+                time_interval = 20;
+            }
+            else acelerado = 1;
+        }
+        else acelerado = 0;
     }
 }

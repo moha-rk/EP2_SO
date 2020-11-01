@@ -7,23 +7,28 @@
 #ifndef RACE_H
 #define RACE_H
 
-int **pista;  //se necessario mudar para aloc dinamica
+int **pista; 
+pthread_mutex_t **pistaMutex;
 ciclist_ptr *ciclistas; //vetor para guardar ciclistas por ordem de id
 
 int **placar; //Este vetor deve ter 2*n ciclistas por n ciclistas
 pthread_mutex_t mutexPlacar;
-int lapAtual;
+
+int lapAtual, ultimaLap;
+pthread_mutex_t mutexUL;
 
 int time_interval, current_time;
 int velodromo_length, velodromo_width;
 int ciclists_number, running_ciclists;
 pthread_mutex_t nCiclistMutex;
-int *arrive, *cont; //se necessario mudar para aloc dinamica
-pthread_mutex_t **pistaMutex;
+int *arrive, *cont;
 
 void start_race(); //funcao para criar os ciclistas e definir configs iniciais
 void update_race();
 void atualiza_placar();
 void verifica_perdedores();
+void acelera_ultimas_voltas();
+int acelerado;
+void para_ciclistas();
 
 #endif
