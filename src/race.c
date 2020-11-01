@@ -154,7 +154,7 @@ void verifica_perdedores()
             fprintf(stderr, "Ciclista %d eliminado\n", ciclistas[ultimo]->id);
             pthread_t tUltimo = ciclistas[ultimo]->thread;
             pthread_cancel(tUltimo); //Cancela a thread instantaneamente pois neste ponto ela está no usleep
-            //pthread_join(tUltimo, NULL);
+            pthread_join(tUltimo, NULL);
             destroy(ciclistas[ultimo]);
             for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
         }
@@ -175,7 +175,7 @@ void para_ciclistas()
 
             //Quando isso pode acontecer? Pq está acontecendo
             if (ciclistas[idAtual] == NULL || ciclistas[idAtual]->speed == 0) continue;
-            
+
             ciclistas[idAtual]->speed = 0;
             running_ciclists--;
         }
