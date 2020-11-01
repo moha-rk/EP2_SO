@@ -113,8 +113,10 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
     acelera_ultimas_voltas();
     para_ciclistas();
 
+
     for (i = 0; i < ciclists_number; i++) cont[i] = 1;
 }
+
 
 //Esta função confere ao fim de cada iteração se um ciclista acabou uma volta e então o coloca no placar daquela volta
 void atualiza_placar()
@@ -127,6 +129,7 @@ void atualiza_placar()
         ciclistas[i]->finishedLap = false;
 
         int j = 1;
+        fprintf(stderr, "Lap = %d\n", ciclistas[i]->laps);
 
         while (placar[ciclistas[i]->laps][j] != 0) j++;
         
@@ -151,9 +154,11 @@ void verifica_perdedores()
         {
             fprintf(stderr, "Ciclista %d eliminado\n", ciclistas[ultimo]->id);
             pthread_t tUltimo = ciclistas[ultimo]->thread;
-            destroy(ciclistas[ultimo]);
             pthread_cancel(tUltimo); //Cancela a thread instantaneamente pois neste ponto ela está no usleep
+            //pthread_join(tUltimo, NULL);
+            destroy(ciclistas[ultimo]);
             for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
+            fprintf(stderr, "eliminou\n");
         }
         lapAtual++;
     }
@@ -161,7 +166,7 @@ void verifica_perdedores()
 
 void para_ciclistas()
 {
-    for (int i = 2*ciclists_number; i >= ultimaLap; i--)
+    for (int i = 2*(ciclists_number-1); i >= ultimaLap; i--)
     {
         for (int j = 1; j <= ciclists_number; j++)
         {
@@ -169,6 +174,14 @@ void para_ciclistas()
             //Se ninguem completou a ultima volta
             if (idAtual == 0) continue;
             //Se chegou aqui, alguém completou
+
+            //Quando isso pode acontecer? Pq está acontecendo
+            if (ciclistas[idAtual] == NULL) 
+            {
+                fprintf(stderr, "caracas\n");
+                continue;
+            }
+            if (ciclistas[idAtual]->speed == 0) continue;
             ciclistas[idAtual]->speed = 0;
             running_ciclists--;
         }

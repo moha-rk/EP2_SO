@@ -82,6 +82,8 @@ void *run(void *ciclist)
                             ultimaLap -= 2; //A quebra de um ciclista faz com que a ultima volta aconteça mais cedo
                             pthread_mutex_unlock(&mutexUL);
 
+                            destroy(c);
+
                             pthread_exit(NULL);
                         }
                         c->finishedLap = true;
@@ -91,8 +93,6 @@ void *run(void *ciclist)
             }
 
         }
-        //fprintf(stderr, "saiu ciclista%d\n", c->id);
-        //Posso usar o próprio arrive para saber se determinado ciclista já andou. Só preciso proteger esse arive com um mutex
         pthread_mutex_lock(&c->mArrive);
         arrive[c->id-1] = 1;
         pthread_mutex_unlock(&c->mArrive);
@@ -120,6 +120,14 @@ bool avanca_metro(ciclist_ptr c)
     }
     else
     {
+        if (ciclistas[idAFrente] == NULL)
+        {
+            int xAnt = c->x_pos;
+            move_to(c, x_front, c->y_pos);
+            pthread_mutex_unlock(&pistaMutex[xAnt][c->y_pos]);
+            pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
+            return true;
+        }
         pthread_mutex_lock(&ciclistas[idAFrente]->mArrive);
         int andou = arrive[idAFrente-1];
         pthread_mutex_unlock(&ciclistas[idAFrente]->mArrive);
@@ -233,7 +241,6 @@ bool quebrou(ciclist_ptr c)
     if (rand()%100 < 5)
     {
         fprintf(stderr, "O ciclista %d quebrou após %d voltas\n", c->id, c->laps);
-        destroy(c);
         return true;
     }
     return false;

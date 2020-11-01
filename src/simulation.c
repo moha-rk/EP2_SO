@@ -27,8 +27,9 @@ int main(int argc, char **argv)
         show_pista();
         current_time += time_interval;
         update_race();
-        usleep(1000*time_interval);
+        usleep(10*time_interval);
     }
+    printf("running ciclist = %d\n", running_ciclists);
 
     print_placar();
 
