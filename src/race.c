@@ -129,7 +129,6 @@ void atualiza_placar()
         ciclistas[i]->finishedLap = false;
 
         int j = 1;
-        fprintf(stderr, "Lap = %d\n", ciclistas[i]->laps);
 
         while (placar[ciclistas[i]->laps][j] != 0) j++;
         
@@ -158,7 +157,6 @@ void verifica_perdedores()
             //pthread_join(tUltimo, NULL);
             destroy(ciclistas[ultimo]);
             for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
-            fprintf(stderr, "eliminou\n");
         }
         lapAtual++;
     }
@@ -176,12 +174,8 @@ void para_ciclistas()
             //Se chegou aqui, alguém completou
 
             //Quando isso pode acontecer? Pq está acontecendo
-            if (ciclistas[idAtual] == NULL) 
-            {
-                fprintf(stderr, "caracas\n");
-                continue;
-            }
-            if (ciclistas[idAtual]->speed == 0) continue;
+            if (ciclistas[idAtual] == NULL || ciclistas[idAtual]->speed == 0) continue;
+            
             ciclistas[idAtual]->speed = 0;
             running_ciclists--;
         }

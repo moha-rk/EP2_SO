@@ -29,7 +29,6 @@ int main(int argc, char **argv)
         update_race();
         usleep(10*time_interval);
     }
-    printf("running ciclist = %d\n", running_ciclists);
 
     print_placar();
 
@@ -40,7 +39,6 @@ int main(int argc, char **argv)
 
 void show_pista()
 {
-    fprintf(stderr, "running ciclists = %d\n", running_ciclists);
     for (int j = 0; j < velodromo_width; j++){
         for (int i = 0; i < velodromo_length; i++){
             fprintf(stderr, "%d  ", pista[i][j]);
@@ -69,6 +67,6 @@ void print_placar()
         {
             fprintf(stderr, "%d ", placar[i][j]);
         }
-        fprintf(stderr, "\n\n");
+        fprintf(stderr, "\n");
     }
 }
