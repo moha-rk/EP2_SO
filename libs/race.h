@@ -11,6 +11,7 @@ int **pista;  //se necessario mudar para aloc dinamica
 ciclist_ptr *ciclistas; //vetor para guardar ciclistas por ordem de id
 
 int **placar; //Este vetor deve ter 2*n ciclistas por n ciclistas
+pthread_mutex_t mutexPlacar;
 int lapAtual;
 
 int time_interval, current_time;

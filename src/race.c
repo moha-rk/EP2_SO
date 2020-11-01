@@ -14,7 +14,6 @@ void start_race()
 
     pista = (int **) malloc(velodromo_length*sizeof(int *));
     pistaMutex = (pthread_mutex_t **) malloc(velodromo_length*sizeof(pthread_mutex_t *));
-
     for (i = 0; i < velodromo_length; i++)
     {
         pista[i] = (int *) calloc(MAX_WIDTH, sizeof(int));
@@ -23,30 +22,40 @@ void start_race()
 
     ciclistas = (ciclist_ptr *) malloc((ciclists_number+1)*sizeof(ciclist_ptr));
 
-    placar = (int **) malloc(2*ciclists_number*sizeof(int *));
-    for (i = 0; i < 2*ciclists_number; i++)
+    placar = (int **) malloc((2*ciclists_number + 1)*sizeof(int *));
+    for (i = 0; i <= 2*ciclists_number; i++)
     {
         placar[i] = (int *) calloc(ciclists_number+1, sizeof(int));
+        placar[i][0] = ciclists_number;
     }
 
     arrive = (int *) malloc(ciclists_number*sizeof(int));
     cont = (int *) malloc(ciclists_number*sizeof(int));
 
 
+    /*INICIALIZAÇÃO DOS MUTEX*/
+
+    pthread_mutex_init(&mutexPlacar, NULL);
+    pthread_mutex_init(&nCiclistMutex, NULL);
+    for (i = 0; i < velodromo_length; i++)
+    {
+        for (j = 0; j < MAX_WIDTH; j++)
+        {
+            pthread_mutex_init(&pistaMutex[i][j], NULL);
+        }
+    }
+
+    /*INICIALIZAÇÃO DAS VARIÁVEIS*/
+
     current_time = 0;    //tempo atual, em milissegundos
     time_interval = 60;  //milissegundos
     velodromo_width = 5; //maximo de 5 ciclistas lado a lado no inicio
     running_ciclists = 0;
-    pthread_mutex_init(&nCiclistMutex, NULL);
+    lapAtual = 1;
 
     int x_pos, y_pos;                                         //posicao de largada, que sera sorteada
     int max_x = (int)ceil(ciclists_number / velodromo_width) + 1; //maximo x de largada
     int max_y = velodromo_width;                              // maximo y de largada
-    for (i = 0; i < ciclists_number; i++)
-    {
-        cont[i] = 0;
-        arrive[i] = 1;
-    }
 
     int linha_atual = 0;
     int n_ciclistas_linha = 0;
@@ -56,6 +65,7 @@ void start_race()
         y_pos = n_ciclistas_linha;
 
         create(x_pos, y_pos);
+
         if (linha_atual != 0)
             ciclistas[running_ciclists]->laps = -1;
         n_ciclistas_linha++;
@@ -68,20 +78,12 @@ void start_race()
 
     velodromo_width = 10; //maximo de 10 ciclistas lado a lado depois do inicio
 
-    for (i = 0; i < velodromo_length; i++)
-    {
-        for (j = 0; j < velodromo_width; j++)
-        {
-            pthread_mutex_init(&pistaMutex[i][j], NULL);
-        }
-    }
+    /*INICIALIZAÇÃO DA BARREIRA*/
 
-    for (i = 0; i < ciclists_number*2; i++)
+    for (i = 0; i < ciclists_number; i++)
     {
-        for (j = 0; j <= ciclists_number; j++)
-        {
-            placar[i][j] = 0;
-        }
+        cont[i] = 0;
+        arrive[i] = 1;
     }
 }
 
@@ -116,7 +118,7 @@ void atualiza_placar()
         if (!ciclistas[i]->finishedLap) continue;
         ciclistas[i]->finishedLap = false;
 
-        int j = 0;
+        int j = 1;
 
         while (placar[ciclistas[i]->laps][j] != 0) j++;
         
@@ -132,4 +134,19 @@ void verifica_perdedores()
     //Toda vez que um ciclista é eliminado, este número é subtraído por 1 nos vetores das voltas seguintes à
     //volta em que este ciclista estava. Caso tenha quebrado, o cilista não completou a volta e deve subtrair
     //da volta atual dele também.
+
+    //A primeira posição de "placar[lapAtual]" guarda o número de ciclistas que estão participando dessa volta"
+    int ultimo = placar[lapAtual][placar[lapAtual][0]];
+    if (ultimo != 0) //Se verdadeiro, a lap acabou
+    {
+        if (lapAtual % 2 == 0) //Elimino o último
+        {
+            fprintf(stderr, "Ciclista %d eliminado\n", ciclistas[ultimo]->id);
+            pthread_t tUltimo = ciclistas[ultimo]->thread;
+            destroy(ciclistas[ultimo]);
+            pthread_cancel(tUltimo); //Cancela a thread instantaneamente pois neste ponto ela está no usleep
+            for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
+        }
+        lapAtual++;
+    }
 }

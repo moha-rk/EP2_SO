@@ -73,7 +73,14 @@ void *run(void *ciclist)
                     c->laps++;
                     if (c->laps > 0) 
                     {
-                        if (quebrou(c)) pthread_exit(NULL);
+                        if (quebrou(c))
+                        {
+                            pthread_mutex_lock(&mutexPlacar);
+                            for (int i = c->laps; i <= 2*ciclists_number; i++) placar[i][0]--;
+                            pthread_mutex_unlock(&mutexPlacar);
+                            
+                            pthread_exit(NULL);
+                        }
                         c->finishedLap = true;
                         atualiza_velocidade(c);
                     }
