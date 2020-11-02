@@ -60,8 +60,8 @@ void *run(void *ciclist)
     int sixthMeter = 0;
 
     while (running) {
-        while (cont[c->id-1] == 0) usleep(10); //Quantia de sleep apenas para testes
-        cont[c->id-1] = 0;
+        while (cont[c->id] == 0) usleep(10); //Quantia de sleep apenas para testes
+        cont[c->id] = 0;
         
         sixthMeter += c->speed*time_interval/600;
         if (sixthMeter == 6){
@@ -73,19 +73,7 @@ void *run(void *ciclist)
                     c->laps++;
                     if (c->laps > 0) 
                     {
-                        if (quebrou(c))
-                        {
-                            pthread_mutex_lock(&mutexPlacar);
-                            for (int i = c->laps; i <= 2*ciclists_number; i++) placar[i][0]--;
-                            pthread_mutex_unlock(&mutexPlacar);
-                            pthread_mutex_lock(&mutexUL);
-                            ultimaLap -= 2; //A quebra de um ciclista faz com que a ultima volta aconteça mais cedo
-                            pthread_mutex_unlock(&mutexUL);
-
-                            destroy(c);
-
-                            pthread_exit(NULL);
-                        }
+                        if (quebrou(c)) pthread_exit(NULL);
                         c->finishedLap = true;
                         atualiza_velocidade(c);
                     }
@@ -93,9 +81,15 @@ void *run(void *ciclist)
             }
 
         }
+
+        //fprintf(stderr, "saiu ciclista%d\n", c->id);
+        //Posso usar o próprio arrive para saber se determinado ciclista já andou. Só preciso proteger esse arive com um mutex
         pthread_mutex_lock(&c->mArrive);
-        arrive[c->id-1] = 1;
+        arrive[c->id] = 1;
+        fprintf(stderr, "c%d andou arrive[%d] = %d\n", c->id, c->id, arrive[c->id]);
+
         pthread_mutex_unlock(&c->mArrive);
+
     }
 
 
@@ -120,31 +114,29 @@ bool avanca_metro(ciclist_ptr c)
     }
     else
     {
-        if (ciclistas[idAFrente] == NULL)
-        {
-            int xAnt = c->x_pos;
-            move_to(c, x_front, c->y_pos);
-            pthread_mutex_unlock(&pistaMutex[xAnt][c->y_pos]);
-            pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
-            return true;
-        }
         pthread_mutex_lock(&ciclistas[idAFrente]->mArrive);
-        int andou = arrive[idAFrente-1];
+        int andou = arrive[idAFrente];
         pthread_mutex_unlock(&ciclistas[idAFrente]->mArrive);
 
         if (andou == 0) 
         {
+            fprintf(stderr, "\nc%d tentando pegar c%d\n", c->id, idAFrente);
             pthread_mutex_unlock(&pistaMutex[x_front][c->y_pos]);
         
             //Espera ocupada
             while (andou == 0)
             {
                 pthread_mutex_lock(&ciclistas[idAFrente]->mArrive);
-                andou = arrive[idAFrente-1];
+                andou = arrive[idAFrente];
+                fprintf(stderr, "arrive[%d] = %d-", idAFrente, arrive[idAFrente]);
                 pthread_mutex_unlock(&ciclistas[idAFrente]->mArrive);
+                fprintf(stderr, "%d-%d|", c->id, idAFrente);
+                usleep(1);
             }
 
             pthread_mutex_lock(&pistaMutex[x_front][c->y_pos]);
+            fprintf(stderr, "\nc%d conseguiu pegar c%d\n", c->id, idAFrente);
+
         }
         idAFrente = pista[x_front][c->y_pos];
         if (idAFrente == 0)
@@ -241,6 +233,7 @@ bool quebrou(ciclist_ptr c)
     if (rand()%100 < 5)
     {
         fprintf(stderr, "O ciclista %d quebrou após %d voltas\n", c->id, c->laps);
+        destroy(c);
         return true;
     }
     return false;

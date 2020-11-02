@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
     while (running_ciclists > 0)
     {
-        show_pista();
+        //show_pista();
         current_time += time_interval;
         update_race();
         usleep(10*time_interval);
@@ -35,17 +35,6 @@ int main(int argc, char **argv)
 
     fclose(output);
     return 0;
-}
-
-void show_pista()
-{
-    for (int j = 0; j < velodromo_width; j++){
-        for (int i = 0; i < velodromo_length; i++){
-            fprintf(stderr, "%d  ", pista[i][j]);
-        }
-        fprintf(stderr, "\n");
-    }
-    fprintf(stderr, "\n\n");
 }
 
 

@@ -25,6 +25,7 @@ int *arrive, *cont;
 
 void start_race(); //funcao para criar os ciclistas e definir configs iniciais
 void update_race();
+void show_pista();
 void atualiza_placar();
 void verifica_perdedores();
 void acelera_ultimas_voltas();

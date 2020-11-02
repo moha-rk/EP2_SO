@@ -29,8 +29,8 @@ void start_race()
         placar[i][0] = ciclists_number;
     }
 
-    arrive = (int *) malloc(ciclists_number*sizeof(int));
-    cont = (int *) malloc(ciclists_number*sizeof(int));
+    arrive = (int *) malloc((ciclists_number+1)*sizeof(int));
+    cont = (int *) malloc((ciclists_number+1)*sizeof(int));
 
 
     /*INICIALIZAÇÃO DOS MUTEX*/
@@ -85,7 +85,7 @@ void start_race()
 
     /*INICIALIZAÇÃO DA BARREIRA*/
 
-    for (i = 0; i < ciclists_number; i++)
+    for (i = 1; i <= ciclists_number; i++)
     {
         cont[i] = 0;
         arrive[i] = 1;
@@ -97,9 +97,9 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
     ciclist_ptr c;
     int vel, dist, i;
 
-    for (i = 0; i < ciclists_number; i++)
+    for (i = 1; i <= ciclists_number; i++)
     {
-        if (ciclistas[i+1] == NULL) continue;
+        if (ciclistas[i] == NULL) continue;
         while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
         arrive[i] = 0;
     }
@@ -113,8 +113,22 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
     acelera_ultimas_voltas();
     para_ciclistas();
 
+    show_pista();
 
-    for (i = 0; i < ciclists_number; i++) cont[i] = 1;
+
+    for (i = 1; i <= ciclists_number; i++) cont[i] = 1;
+}
+
+
+void show_pista()
+{
+    for (int j = 0; j < velodromo_width; j++){
+        for (int i = 0; i < velodromo_length; i++){
+            fprintf(stderr, "%d  ", pista[i][j]);
+        }
+        fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "\n\n");
 }
 
 
