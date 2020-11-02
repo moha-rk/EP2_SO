@@ -19,6 +19,11 @@ int main(int argc, char **argv)
     ciclists_number = atoi(argv[2]);
 
     FILE *output = fopen("relatorio.txt", "w");
+    if (output == NULL)
+    {
+        fprintf(stderr, "O arquivo de output não pode ser aberto\n");
+        exit (EXIT_FAILURE);
+    }
 
     start_race(); //seta as condicoes iniciais e cria os ciclistas
 
@@ -34,10 +39,9 @@ int main(int argc, char **argv)
 
     destroy_race();
 
-    fprintf(stderr, "destruiu corrida");
+    //fprintf(output, "a");
 
-    //Ta dando segfault (????????)
-    //fclose(output);
+    fclose(output);
     return 0;
 }
 

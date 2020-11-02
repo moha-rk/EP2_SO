@@ -239,9 +239,14 @@ void destroy_race()
 
     for (i = 1; i <= ciclists_number; i ++)
     {
-        if (ciclistas[i] != NULL) destroy(ciclistas[i]); //Destroi ciclistas remanescentes
+        if (ciclistas[i] != NULL)
+        {
+            pthread_t t = ciclistas[i]->thread;
+            pthread_cancel(t); //Cancela a thread instantaneamente pois neste ponto ela está no usleep
+            pthread_join(t, NULL);
+            destroy(ciclistas[i]); //Destroi ciclistas remanescentes
+        }
     }
-        fprintf(stderr, "passou1");
     for (i = 0; i < velodromo_length; i++)
     {
         free(pista[i]);
@@ -250,19 +255,14 @@ void destroy_race()
         free(pistaMutex[i]);
     }
     free(pistaMutex);
-    fprintf(stderr, "passou2");
     free(pista);
 
     free(ciclistas);
-
-        fprintf(stderr, "passou3");
 
     for (i = 1; i <= ciclists_number; i++)
     {
         pthread_mutex_destroy(&mArrive[i]);
     }
-        fprintf(stderr, "passou4");
-
 
     free(mArrive);
 
@@ -276,12 +276,6 @@ void destroy_race()
     free(cont);
 
     pthread_mutex_destroy(&mutexPlacar);
-        fprintf(stderr, "passou5");
-
     pthread_mutex_destroy(&mutexUL);
-        fprintf(stderr, "passou6");
-
     pthread_mutex_destroy(&nCiclistMutex);
-        fprintf(stderr, "passou7");
-
 }
