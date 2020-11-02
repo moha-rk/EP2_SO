@@ -33,3 +33,5 @@ Para andar, o ciclista deve travar seu mutex e então procurar um lugar para se 
 Para armazenar as posições, penso em fazer uma matriz em que cada vetor corresponde às posições da volta de sua posição. Isto é, o primeiro vetor corrsponde às posições da primeira volta e assim sucessivamente. Em cada espaço do vetor, será armazenado o id do ciclista que completou a volta em tal posição, e assim a verificação de que todos completaram a volta fica fácil. Basta saber quantos ciclistas ainda estavam correndo nessa volta, e verificar essa posição do vetor (se ainda é 0).
 
 As chances de quebra devem ser implementadas dentro do próprio ciclista, e a armazenagem das posições deve ser feita pela main, após receber todos os arrives como 1 (ou não? acho que sim)
+
+Estruturas de tamanho prealocado que precisam ser alteradas: pista, pistaMutex, ciclistas, placar, arrive, continue. Todas estão em race, e vou alterar uma de cada vez e cuidar das consequencias de cada.
