@@ -79,6 +79,11 @@ void *run(void *ciclist)
                             pthread_mutex_lock(&mutexUL);
                             ultimaLap -= 2; //A quebra de um ciclista faz com que a ultima volta aconteça mais cedo
                             pthread_mutex_unlock(&mutexUL);
+
+                            pthread_mutex_lock(&mArrive[c->id]);
+                            arrive[c->id] = 1;
+                            pthread_mutex_unlock(&mArrive[c->id]);
+
                             destroy(c);
 
                             pthread_exit(NULL);
@@ -90,15 +95,38 @@ void *run(void *ciclist)
             }
         }
 
-        //fprintf(stderr, "saiu ciclista%d\n", c->id);
+        //Tenta mover o ciclista o mais a esquerda o possivel
+        anda_para_esquerda(c);
+
         //Posso usar o próprio arrive para saber se determinado ciclista já andou. Só preciso proteger esse arive com um mutex
         pthread_mutex_lock(&mArrive[c->id]);
         arrive[c->id] = 1;
         pthread_mutex_unlock(&mArrive[c->id]);
 
     }
+}
 
-
+void anda_para_esquerda(ciclist_ptr c)
+{
+    int idAtual, y_ant;
+    y_ant = c->y_pos;
+    pthread_mutex_lock(&pistaMutex[c->x_pos][y_ant]);
+    for (int i = 0; i < c->y_pos; i++)
+    {
+        if (pthread_mutex_trylock(&pistaMutex[c->x_pos][i]) == 0)
+        {    
+            idAtual = pista[c->x_pos][i];
+            if (idAtual == 0)
+            {
+                move_to(c, c->x_pos, i);
+                pthread_mutex_unlock(&pistaMutex[c->x_pos][y_ant]);
+                pthread_mutex_unlock(&pistaMutex[c->x_pos][i]);
+                return;
+            }
+            pthread_mutex_unlock(&pistaMutex[c->x_pos][i]);
+        }
+    }
+    pthread_mutex_unlock(&pistaMutex[c->x_pos][y_ant]);
 }
 
 bool avanca_metro(ciclist_ptr c)
@@ -241,7 +269,7 @@ bool quebrou(ciclist_ptr c)
     }
     pthread_mutex_unlock(&nCiclistMutex);
 
-    if (rand()%100 < 25)
+    if (rand()%100 < 20)
     {
         fprintf(stderr, "O ciclista %d quebrou após %d voltas\n", c->id, c->laps);
         return true;

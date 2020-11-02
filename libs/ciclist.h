@@ -23,10 +23,14 @@ typedef ciclist *ciclist_ptr;
 void create(int, int);
 void destroy(ciclist_ptr);
 void move_to(ciclist_ptr, int, int);
+
 void *run(void *ciclist);
+void anda_para_esquerda(ciclist_ptr c);
+
 bool avanca_metro(ciclist_ptr c);
 bool espaco_lado(int x, int y);
 int espaco_frente(int x, int y);
+
 void atualiza_velocidade(ciclist_ptr c);
 bool quebrou(ciclist_ptr c);
 
