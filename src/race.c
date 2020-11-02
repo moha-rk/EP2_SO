@@ -109,9 +109,6 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
         while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
     }
     //Aqui a execução está pausada, todos os ciclistas esperam pelo continue
-    //O ideal seria contabilizar voltas aqui, e eliminar quem deve ser eliminado
-    //Claro, também sortear a nova velocidade na ultima volta
-
 
     for (i = 1; i <= ciclists_number; i++)
         arrive[i] = 0; //Arrives serão zerados apenas quando a execução de todas as threads passar, pois seu valor é usado pelas outras threads
@@ -199,6 +196,7 @@ void para_ciclistas()
             //Quando isso pode acontecer? Pq está acontecendo
             if (ciclistas[idAtual] == NULL || ciclistas[idAtual]->speed == 0) continue;
 
+            //Devo parar o ciclista ou excluí-lo?  (vou excluí-lo para que não fique no caminho)
             ciclistas[idAtual]->speed = 0;
             running_ciclists--;
         }
@@ -215,8 +213,8 @@ void acelera_ultimas_voltas()
             ciclistas[placar[ultimaLap-2][2]]->speed = HIGH_SPEED;
             acelerado = 0;
             time_interval = 20;
-            return;
         }
+        return;
     }
     
     if (placar[ultimaLap-2][1] != 0)
@@ -233,4 +231,57 @@ void acelera_ultimas_voltas()
         }
         else acelerado = 0;
     }
+}
+
+void destroy_race()
+{
+    int i, j;
+
+    for (i = 1; i <= ciclists_number; i ++)
+    {
+        if (ciclistas[i] != NULL) destroy(ciclistas[i]); //Destroi ciclistas remanescentes
+    }
+        fprintf(stderr, "passou1");
+    for (i = 0; i < velodromo_length; i++)
+    {
+        free(pista[i]);
+        for (j = 0; j < MAX_WIDTH; j++)
+            pthread_mutex_destroy(&pistaMutex[i][j]);
+        free(pistaMutex[i]);
+    }
+    free(pistaMutex);
+    fprintf(stderr, "passou2");
+    free(pista);
+
+    free(ciclistas);
+
+        fprintf(stderr, "passou3");
+
+    for (i = 1; i <= ciclists_number; i++)
+    {
+        pthread_mutex_destroy(&mArrive[i]);
+    }
+        fprintf(stderr, "passou4");
+
+
+    free(mArrive);
+
+    for (i = 0; i <= 2*ciclists_number; i++)
+    {
+        free(placar[i]);
+    }
+    free(placar);
+
+    free(arrive);
+    free(cont);
+
+    pthread_mutex_destroy(&mutexPlacar);
+        fprintf(stderr, "passou5");
+
+    pthread_mutex_destroy(&mutexUL);
+        fprintf(stderr, "passou6");
+
+    pthread_mutex_destroy(&nCiclistMutex);
+        fprintf(stderr, "passou7");
+
 }

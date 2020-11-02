@@ -33,5 +33,6 @@ void verifica_perdedores();
 void acelera_ultimas_voltas();
 int acelerado;
 void para_ciclistas();
+void destroy_race();
 
 #endif

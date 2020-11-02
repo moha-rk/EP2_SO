@@ -32,8 +32,12 @@ int main(int argc, char **argv)
 
     print_placar();
 
+    destroy_race();
 
-    fclose(output);
+    fprintf(stderr, "destruiu corrida");
+
+    //Ta dando segfault (????????)
+    //fclose(output);
     return 0;
 }
 
