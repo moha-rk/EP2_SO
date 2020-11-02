@@ -9,7 +9,9 @@
 
 int **pista; 
 pthread_mutex_t **pistaMutex;
+
 ciclist_ptr *ciclistas; //vetor para guardar ciclistas por ordem de id
+pthread_mutex_t *mArrive;
 
 int **placar; //Este vetor deve ter 2*n ciclistas por n ciclistas
 pthread_mutex_t mutexPlacar;

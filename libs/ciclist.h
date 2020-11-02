@@ -16,7 +16,6 @@ typedef struct ciclist_struct
     int laps;
     bool finishedLap;
     pthread_t thread;
-    pthread_mutex_t mArrive;
 } ciclist;
 
 typedef ciclist *ciclist_ptr;

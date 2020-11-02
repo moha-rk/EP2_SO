@@ -21,6 +21,7 @@ void start_race()
     }
 
     ciclistas = (ciclist_ptr *) malloc((ciclists_number+1)*sizeof(ciclist_ptr));
+    mArrive = (pthread_mutex_t *) malloc((ciclists_number+1)*sizeof(pthread_mutex_t));
 
     placar = (int **) malloc((2*ciclists_number + 1)*sizeof(int *));
     for (i = 0; i <= 2*ciclists_number; i++)
@@ -34,6 +35,11 @@ void start_race()
 
 
     /*INICIALIZAÇÃO DOS MUTEX*/
+
+    for (i = 1; i <= ciclists_number; i++)
+    {
+        pthread_mutex_init(&mArrive[i], NULL);
+    }
 
     pthread_mutex_init(&mutexPlacar, NULL);
     pthread_mutex_init(&mutexUL, NULL);
