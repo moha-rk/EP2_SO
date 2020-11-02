@@ -27,7 +27,7 @@ int main(int argc, char **argv)
         //show_pista();
         current_time += time_interval;
         update_race();
-        usleep(10*time_interval);
+        usleep(100*time_interval);
     }
 
     print_placar();

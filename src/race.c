@@ -101,11 +101,14 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
     {
         if (ciclistas[i] == NULL) continue;
         while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
-        arrive[i] = 0;
     }
     //Aqui a execução está pausada, todos os ciclistas esperam pelo continue
     //O ideal seria contabilizar voltas aqui, e eliminar quem deve ser eliminado
     //Claro, também sortear a nova velocidade na ultima volta
+
+
+    for (i = 1; i <= ciclists_number; i++)
+        arrive[i] = 0; //Arrives serão zerados apenas quando a execução de todas as threads passar, pois seu valor é usado pelas outras threads
 
 
     atualiza_placar();
