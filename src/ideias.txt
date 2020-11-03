@@ -35,3 +35,8 @@ Para armazenar as posições, penso em fazer uma matriz em que cada vetor corres
 As chances de quebra devem ser implementadas dentro do próprio ciclista, e a armazenagem das posições deve ser feita pela main, após receber todos os arrives como 1 (ou não? acho que sim)
 
 Estruturas de tamanho prealocado que precisam ser alteradas: pista, pistaMutex, ciclistas, placar, arrive, continue. Todas estão em race, e vou alterar uma de cada vez e cuidar das consequencias de cada.
+
+
+AAAAAAAAAAAAAAAAAA
+
+Preciso cuidar do output, onde cada ciclista terá sua ultima volta e o tempo que a completou printado. Os que quebraram também terão a volta em que quebraram e o tempo. Portanto, preciso parar de apagar o struct do ciclista que ser eliminado, e ao invés de checar se o ciclista[i] é NULL, preciso adicionar dois booleanos (eliminado e quebrado (ambos true se quebrou, eliminado true e quebrado false se eliminado por ser o ultimo)) e conferir se eliminado == true. No fim, basta apenas conferir as infos guardadas no struct (guardar momento de fim de corrida.)

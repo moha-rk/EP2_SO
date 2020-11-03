@@ -11,9 +11,11 @@ typedef struct ciclist_struct
 {
     int id;
     bool running;
+    bool quebrou;
     int speed;
     int x_pos, y_pos;
     int laps;
+    int time_running;
     bool finishedLap;
     pthread_t thread;
 } ciclist;
@@ -21,7 +23,7 @@ typedef struct ciclist_struct
 typedef ciclist *ciclist_ptr;
 
 void create(int, int);
-void destroy(ciclist_ptr);
+void elimina(ciclist_ptr);
 void move_to(ciclist_ptr, int, int);
 
 void *run(void *ciclist);

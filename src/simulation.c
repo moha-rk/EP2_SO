@@ -10,13 +10,15 @@ void show_pista();
 void print_placar();
 
 static void show_help(char *programName);
+bool debug = false;
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    if (argc < 3)
         show_help(argv[0]);
     velodromo_length = atoi(argv[1]);
     ciclists_number = atoi(argv[2]);
+    if (argc == 4 && strcmp(argv[3], "d") == 0) debug = true;
 
     FILE *output = fopen("relatorio.txt", "w");
     if (output == NULL)
@@ -29,10 +31,9 @@ int main(int argc, char **argv)
 
     while (running_ciclists > 0)
     {
-        //show_pista();
-        current_time += time_interval;
-        update_race();
-        usleep(100*time_interval);
+        update_race(debug, output);
+        //usleep(100*time_interval);
+        usleep(1);
     }
 
     print_placar();
@@ -49,7 +50,8 @@ int main(int argc, char **argv)
 static void show_help(char *programName)
 {
     fprintf(stderr, "%s: Uso \n"
-                    "prompt> %s tamanho-do-velodromo ciclistas\n"
+                    "prompt> %s tamanho-do-velodromo ciclistas [d]\n"
+                    "[d] = argumento opcional para habilitar debug\n"
                     ,
             programName, programName);
     exit (EXIT_FAILURE);
