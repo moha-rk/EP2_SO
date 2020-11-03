@@ -13,6 +13,7 @@ void create(int x, int y)
     c->id = running_ciclists;
 
     c->running = true;
+    c->quebrou = false;
     c->speed = LOW_SPEED;
     c->laps = 0;
     c->finishedLap = false;
@@ -28,18 +29,21 @@ void create(int x, int y)
     ciclistas[c->id] = c;
 }
 
-void destroy(ciclist_ptr c)
+void elimina(ciclist_ptr c)
 {
     pthread_mutex_lock(&pistaMutex[c->x_pos][c->y_pos]);
-    pista[c->x_pos][c->y_pos] = 0;
+    if (pista[c->x_pos][c->y_pos] == c->id) pista[c->x_pos][c->y_pos] = 0;
     pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
 
     pthread_mutex_lock(&nCiclistMutex);
+    c->rank = running_ciclists;
     running_ciclists--;
     pthread_mutex_unlock(&nCiclistMutex);
 
-    ciclistas[c->id] = NULL;
-    free(c);
+    c->running = false;
+    c->time_running = current_time;
+    if (c->quebrou) return;
+    ranking_final[c->rank] = c->id;
 }
 
 void move_to(ciclist_ptr c, int x, int y)
@@ -54,12 +58,12 @@ void move_to(ciclist_ptr c, int x, int y)
 void *run(void *ciclist)
 {
     ciclist_ptr c = (ciclist_ptr) ciclist;
-    bool running = true;
     int sixthMeter = 0;
 
-    while (running) {
+    while (c->running) {
         while (cont[c->id] == 0) usleep(10); //Quantia de sleep apenas para testes
         cont[c->id] = 0;
+        if (!c->running) break; //Para caso seja eliminado com a thread parada acima
         
         sixthMeter += c->speed*time_interval/600;
         if (sixthMeter >= 6){
@@ -73,23 +77,23 @@ void *run(void *ciclist)
                     {
                         if (quebrou(c))
                         {
+                            c->quebrou = true;
+
                             pthread_mutex_lock(&mutexPlacar);
                             for (int i = c->laps; i <= 2*ciclists_number; i++) placar[i][0]--;
                             pthread_mutex_unlock(&mutexPlacar);
+
                             pthread_mutex_lock(&mutexUL);
                             ultimaLap -= 2; //A quebra de um ciclista faz com que a ultima volta aconteça mais cedo
                             pthread_mutex_unlock(&mutexUL);
 
-                            pthread_mutex_lock(&mArrive[c->id]);
-                            arrive[c->id] = 1;
-                            pthread_mutex_unlock(&mArrive[c->id]);
-
-                            destroy(c);
-
-                            pthread_exit(NULL);
+                            elimina(c);
                         }
-                        c->finishedLap = true;
-                        atualiza_velocidade(c);
+                        else
+                        {
+                            c->finishedLap = true;
+                            atualiza_velocidade(c);
+                        }
                     }
                 }
             }
@@ -102,12 +106,13 @@ void *run(void *ciclist)
         pthread_mutex_lock(&mArrive[c->id]);
         arrive[c->id] = 1;
         pthread_mutex_unlock(&mArrive[c->id]);
-
     }
+    pthread_exit(NULL);
 }
 
 void anda_para_esquerda(ciclist_ptr c)
 {
+    if (!c->running) return;
     int idAtual, y_ant;
     y_ant = c->y_pos;
     pthread_mutex_lock(&pistaMutex[c->x_pos][y_ant]);
@@ -150,8 +155,8 @@ bool avanca_metro(ciclist_ptr c)
     }
     else
     {
-        //Caso ciclista quebre e ainda esteja na posição 0 nessa iteração (nao deveria)
-        if (ciclistas[idAFrente] == NULL)
+        //Caso ciclista quebre e ainda esteja na posição 0 nessa iteração (nao foi apagado ainda)
+        if (!ciclistas[idAFrente]->running)
         {
             int xAnt = c->x_pos;
             move_to(c, x_front, c->y_pos);
@@ -269,7 +274,7 @@ bool quebrou(ciclist_ptr c)
     }
     pthread_mutex_unlock(&nCiclistMutex);
 
-    if (rand()%100 < 20)
+    if (rand()%100 < 5)
     {
         fprintf(stderr, "O ciclista %d quebrou após %d voltas\n", c->id, c->laps);
         return true;

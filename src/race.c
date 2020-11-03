@@ -30,8 +30,12 @@ void start_race()
         placar[i][0] = ciclists_number;
     }
 
+    ranking_final = (int *) calloc((ciclists_number+1), sizeof(int));
+
     arrive = (int *) malloc((ciclists_number+1)*sizeof(int));
     cont = (int *) malloc((ciclists_number+1)*sizeof(int));
+
+    indices = (int *) malloc((ciclists_number)*sizeof(int));
 
 
     /*INICIALIZAÇÃO DOS MUTEX*/
@@ -53,6 +57,9 @@ void start_race()
     }
 
     /*INICIALIZAÇÃO DAS VARIÁVEIS*/
+
+    for (i = 0; i < ciclists_number; i++) indices[i] = i+1;
+    
 
     current_time = 0;    //tempo atual, em milissegundos
     time_interval = 60;  //milissegundos
@@ -98,14 +105,14 @@ void start_race()
     }
 }
 
-void update_race() //Update race deverá servir para coordenar o andamento dos ciclistas
+void update_race(bool debug, FILE *output) //Update race deverá servir para coordenar o andamento dos ciclistas
 {
     ciclist_ptr c;
     int vel, dist, i;
 
     for (i = 1; i <= ciclists_number; i++)
     {
-        if (ciclistas[i] == NULL) continue;
+        if (!ciclistas[i]->running) continue;
         while (arrive[i] == 0) usleep(1);  //Quantia de sleep apenas para testes
     }
     //Aqui a execução está pausada, todos os ciclistas esperam pelo continue
@@ -113,21 +120,26 @@ void update_race() //Update race deverá servir para coordenar o andamento dos c
     for (i = 1; i <= ciclists_number; i++)
         arrive[i] = 0; //Arrives serão zerados apenas quando a execução de todas as threads passar, pois seu valor é usado pelas outras threads
 
+    current_time += time_interval;
 
     atualiza_placar();
     verifica_perdedores();
+    if (fim_de_volta()) output_volta(output);
+    atualiza_volta();
+
     acelera_ultimas_voltas();
     para_ciclistas();
 
-    show_pista();
+    show_pista(debug);
 
 
     for (i = 1; i <= ciclists_number; i++) cont[i] = 1;
 }
 
 
-void show_pista()
+void show_pista(bool debug)
 {
+    if (!debug) return;
     for (int j = 0; j < velodromo_width; j++){
         for (int i = 0; i < velodromo_length; i++){
             fprintf(stderr, "%d  ", pista[i][j]);
@@ -141,45 +153,68 @@ void show_pista()
 //Esta função confere ao fim de cada iteração se um ciclista acabou uma volta e então o coloca no placar daquela volta
 void atualiza_placar()
 {
-    for (int i = 1; i <= ciclists_number; i++)
+    int x;
+    FisherYates(indices, ciclists_number);
+    
+    for (int i = 0; i < ciclists_number; i++)
     {
-        //Mudar aqui pois não está aleatorio, o ciclista de menor id chega primeiro
-        if (ciclistas[i] == NULL) continue;
-        if (!ciclistas[i]->finishedLap) continue;
-        ciclistas[i]->finishedLap = false;
+        x = indices[i];
+
+        if (!ciclistas[x]->running) continue;
+        if (!ciclistas[x]->finishedLap) continue;
+        ciclistas[x]->finishedLap = false;
 
         int j = 1;
 
-        while (placar[ciclistas[i]->laps][j] != 0) j++;
+        while (placar[ciclistas[x]->laps][j] != 0) j++;
         
-        placar[ciclistas[i]->laps][j] = ciclistas[i]->id;
+        placar[ciclistas[x]->laps][j] = ciclistas[x]->id;
     }
+}
 
+void FisherYates(int *v, int n) 
+{ //Algoritmo de Fisher-Yates para embaralhar vetor
+     int i, j, tmp;
 
+     for (i = n - 1; i > 0; i--) 
+     {
+         j = rand() % (i + 1);
+         tmp = v[j];
+         v[j] = v[i];
+         v[i] = tmp;
+     }
+}
+
+bool atualiza_volta()
+{
+    if (fim_de_volta())
+        lapAtual++;
 }
 
 void verifica_perdedores()
 {
-    //Primeira posição dos vetores de placar corresponderá à quantia de ciclistas que competem naquela volta. 
-    //Toda vez que um ciclista é eliminado, este número é subtraído por 1 nos vetores das voltas seguintes à
-    //volta em que este ciclista estava. Caso tenha quebrado, o cilista não completou a volta e deve subtrair
-    //da volta atual dele também.
-
-    //A primeira posição de "placar[lapAtual]" guarda o número de ciclistas que estão participando dessa volta"
-    int ultimo = placar[lapAtual][placar[lapAtual][0]];
-    if (ultimo != 0) //Se verdadeiro, a lap acabou
+    if (fim_de_volta() && lapAtual % 2 == 0) //Se verdadeiro, a volta acabou
     {
-        if (lapAtual % 2 == 0) //Elimino o último
-        {
-            fprintf(stderr, "Ciclista %d eliminado\n", ciclistas[ultimo]->id);
-            pthread_t tUltimo = ciclistas[ultimo]->thread;
-            pthread_cancel(tUltimo); //Cancela a thread instantaneamente pois neste ponto ela está no usleep
-            pthread_join(tUltimo, NULL);
-            destroy(ciclistas[ultimo]);
-            for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
-        }
-        lapAtual++;
+        int ultimo = placar[lapAtual][placar[lapAtual][0]];
+        elimina(ciclistas[ultimo]);
+        for (int i = lapAtual + 1; i <= 2*ciclists_number; i++) placar[i][0]--;
     }
+}
+
+bool fim_de_volta()
+{
+    //A primeira posição de "placar[x]" guarda o número de ciclistas que estão participando dessa volta x
+    int ultimo = placar[lapAtual][placar[lapAtual][0]];
+    if (ultimo == 0) //Se verdadeiro, a volta acabou
+        return false;
+    return true;
+}
+
+void output_volta(FILE *output)
+{
+    fprintf(output, "Volta %d:", lapAtual);
+    for (int i = 1; i <= placar[lapAtual][0]; i++) fprintf(output, " %d", placar[lapAtual][i]);
+    fprintf(output, "\n");
 }
 
 void para_ciclistas()
@@ -194,11 +229,9 @@ void para_ciclistas()
             //Se chegou aqui, alguém completou
 
             //Quando isso pode acontecer? Pq está acontecendo
-            if (ciclistas[idAtual] == NULL || ciclistas[idAtual]->speed == 0) continue;
+            if (!ciclistas[idAtual]->running) continue;
 
-            //Devo parar o ciclista ou excluí-lo?  (vou excluí-lo para que não fique no caminho)
-            ciclistas[idAtual]->speed = 0;
-            running_ciclists--;
+            elimina(ciclistas[idAtual]);
         }
     }
 }
@@ -237,16 +270,6 @@ void destroy_race()
 {
     int i, j;
 
-    for (i = 1; i <= ciclists_number; i ++)
-    {
-        if (ciclistas[i] != NULL)
-        {
-            pthread_t t = ciclistas[i]->thread;
-            pthread_cancel(t); //Cancela a thread instantaneamente pois neste ponto ela está no usleep
-            pthread_join(t, NULL);
-            destroy(ciclistas[i]); //Destroi ciclistas remanescentes
-        }
-    }
     for (i = 0; i < velodromo_length; i++)
     {
         free(pista[i]);
@@ -256,6 +279,9 @@ void destroy_race()
     }
     free(pistaMutex);
     free(pista);
+
+    for (i = 1; i <= ciclists_number; i ++)
+        free(ciclistas[i]);
 
     free(ciclistas);
 

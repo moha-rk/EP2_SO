@@ -6,17 +6,18 @@
 #include "../libs/race.h"
 #include "../libs/ciclist.h"
 
-void show_pista();
-void print_placar();
+void escreve_placar(FILE *output);
 
 static void show_help(char *programName);
+bool debug = false;
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    if (argc < 3)
         show_help(argv[0]);
     velodromo_length = atoi(argv[1]);
     ciclists_number = atoi(argv[2]);
+    if (argc == 4 && strcmp(argv[3], "d") == 0) debug = true;
 
     FILE *output = fopen("relatorio.txt", "w");
     if (output == NULL)
@@ -29,17 +30,14 @@ int main(int argc, char **argv)
 
     while (running_ciclists > 0)
     {
-        //show_pista();
-        current_time += time_interval;
-        update_race();
-        usleep(100*time_interval);
+        update_race(debug, output);
+        //usleep(100*time_interval);
+        usleep(1);
     }
 
-    print_placar();
+    escreve_placar(output);
 
     destroy_race();
-
-    //fprintf(output, "a");
 
     fclose(output);
     return 0;
@@ -49,21 +47,30 @@ int main(int argc, char **argv)
 static void show_help(char *programName)
 {
     fprintf(stderr, "%s: Uso \n"
-                    "prompt> %s tamanho-do-velodromo ciclistas\n"
+                    "prompt> %s tamanho-do-velodromo ciclistas [d]\n"
+                    "[d] = argumento opcional para habilitar debug\n"
                     ,
             programName, programName);
     exit (EXIT_FAILURE);
 }
 
-void print_placar()
+void escreve_placar(FILE *output)
 {
-    for (int i = 1; i <= 2*ciclists_number; i++)
+    int posAtual = 1, idAtual;
+    fprintf(output, "\nRanqueamento Final:\n");
+    for (int i = 1; i <= ciclists_number; i++)
     {
-        fprintf(stderr, "Volta %d:\n", i);
-        for (int j = 0; j <= ciclists_number; j++)
-        {
-            fprintf(stderr, "%d ", placar[i][j]);
-        }
-        fprintf(stderr, "\n");
+        if (ranking_final[i] == 0) continue;
+        idAtual = ranking_final[i];
+        fprintf(output, "%d: Ciclista %d - %.2f segundos\n", posAtual, idAtual, (float)ciclistas[idAtual]->time_running/1000);
+
+        posAtual++;
     }
+    fprintf(output, "\n");
+
+    for (int i = 1; i <= ciclists_number; i++)
+    {
+        if (ciclistas[i]->quebrou) fprintf(output, "Ciclista %d quebrou na volta %d - %.2f segundos\n", i, ciclistas[i]->laps, (float)ciclistas[i]->time_running/1000);
+    }
+   
 }
