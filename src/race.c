@@ -30,6 +30,8 @@ void start_race()
         placar[i][0] = ciclists_number;
     }
 
+    ranking_final = (int *) calloc((ciclists_number+1), sizeof(int));
+
     arrive = (int *) malloc((ciclists_number+1)*sizeof(int));
     cont = (int *) malloc((ciclists_number+1)*sizeof(int));
 
@@ -170,7 +172,8 @@ void atualiza_placar()
     }
 }
 
-void FisherYates(int *v, int n) { //Algoritmo de Fisher-Yates para embaralhar vetor
+void FisherYates(int *v, int n) 
+{ //Algoritmo de Fisher-Yates para embaralhar vetor
      int i, j, tmp;
 
      for (i = n - 1; i > 0; i--) 
@@ -228,7 +231,6 @@ void para_ciclistas()
             //Quando isso pode acontecer? Pq está acontecendo
             if (!ciclistas[idAtual]->running) continue;
 
-            //Devo parar o ciclista ou excluí-lo?  (vou excluí-lo para que não fique no caminho)
             elimina(ciclistas[idAtual]);
         }
     }
@@ -264,20 +266,10 @@ void acelera_ultimas_voltas()
     }
 }
 
-
-
 void destroy_race()
 {
     int i, j;
 
-    for (i = 1; i <= ciclists_number; i ++)
-    {
-        if (ciclistas[i]->running)
-        {
-            fprintf(stderr, "SOBROU CICLISTA RODANDO");
-        }
-        free(ciclistas[i]);
-    }
     for (i = 0; i < velodromo_length; i++)
     {
         free(pista[i]);
@@ -287,6 +279,9 @@ void destroy_race()
     }
     free(pistaMutex);
     free(pista);
+
+    for (i = 1; i <= ciclists_number; i ++)
+        free(ciclistas[i]);
 
     free(ciclistas);
 

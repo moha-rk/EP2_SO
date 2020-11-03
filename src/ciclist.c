@@ -32,15 +32,18 @@ void create(int x, int y)
 void elimina(ciclist_ptr c)
 {
     pthread_mutex_lock(&pistaMutex[c->x_pos][c->y_pos]);
-    pista[c->x_pos][c->y_pos] = 0;
+    if (pista[c->x_pos][c->y_pos] == c->id) pista[c->x_pos][c->y_pos] = 0;
     pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
 
     pthread_mutex_lock(&nCiclistMutex);
+    c->rank = running_ciclists;
     running_ciclists--;
     pthread_mutex_unlock(&nCiclistMutex);
 
     c->running = false;
     c->time_running = current_time;
+    if (c->quebrou) return;
+    ranking_final[c->rank] = c->id;
 }
 
 void move_to(ciclist_ptr c, int x, int y)
@@ -152,7 +155,7 @@ bool avanca_metro(ciclist_ptr c)
     }
     else
     {
-        //Caso ciclista quebre e ainda esteja na posição 0 nessa iteração (nao deveria)
+        //Caso ciclista quebre e ainda esteja na posição 0 nessa iteração (nao foi apagado ainda)
         if (!ciclistas[idAFrente]->running)
         {
             int xAnt = c->x_pos;

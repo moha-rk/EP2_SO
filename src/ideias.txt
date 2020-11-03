@@ -40,3 +40,5 @@ Estruturas de tamanho prealocado que precisam ser alteradas: pista, pistaMutex, 
 AAAAAAAAAAAAAAAAAA
 
 Preciso cuidar do output, onde cada ciclista terá sua ultima volta e o tempo que a completou printado. Os que quebraram também terão a volta em que quebraram e o tempo. Portanto, preciso parar de apagar o struct do ciclista que ser eliminado, e ao invés de checar se o ciclista[i] é NULL, preciso adicionar dois booleanos (eliminado e quebrado (ambos true se quebrou, eliminado true e quebrado false se eliminado por ser o ultimo)) e conferir se eliminado == true. No fim, basta apenas conferir as infos guardadas no struct (guardar momento de fim de corrida.)
+
+thread ciclista vencedor nao vai ser apagada

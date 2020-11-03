@@ -10,6 +10,7 @@
 typedef struct ciclist_struct
 {
     int id;
+    int rank;
     bool running;
     bool quebrou;
     int speed;
