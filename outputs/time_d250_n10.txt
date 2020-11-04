@@ -14,3 +14,26 @@
 2.82 segundos, 1112 Kilobytes
 4.48 segundos, 1100 Kilobytes
 4.05 segundos, 1112 Kilobytes
+2.84 segundos, 1112 Kilobytes
+4.65 segundos, 1100 Kilobytes
+1.85 segundos, 1116 Kilobytes
+Command terminated by signal 2
+1.08 segundos, 1052 Kilobytes
+Command terminated by signal 2
+0.13 segundos, 880 Kilobytes
+Command terminated by signal 2
+0.48 segundos, 928 Kilobytes
+Command terminated by signal 2
+0.02 segundos, 880 Kilobytes
+Command terminated by signal 2
+0.03 segundos, 880 Kilobytes
+Command terminated by signal 2
+0.02 segundos, 888 Kilobytes
+Command terminated by signal 2
+0.02 segundos, 880 Kilobytes
+Command terminated by signal 2
+0.01 segundos, 880 Kilobytes
+Command terminated by signal 2
+0.02 segundos, 880 Kilobytes
+Command terminated by signal 2
+0.05 segundos, 880 Kilobytes
