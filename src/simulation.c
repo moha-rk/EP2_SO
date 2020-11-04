@@ -15,15 +15,24 @@ int main(int argc, char **argv)
 {
     if (argc < 3)
         show_help(argv[0]);
+
     velodromo_length = atoi(argv[1]);
     ciclists_number = atoi(argv[2]);
-    if (argc == 4 && strcmp(argv[3], "d") == 0) debug = true;
 
-    FILE *output = fopen("relatorio.txt", "w");
+    if (argc == 4 && strcmp(argv[3], "d") == 0)
+        debug = true;
+
+    FILE *output;
+
+    if (argc == 5)
+        output = fopen(argv[4], "w");
+    else
+        output = fopen("relatorio.txt", "w");
+
     if (output == NULL)
     {
         fprintf(stderr, "O arquivo de output não pode ser aberto\n");
-        exit (EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     start_race(); //seta as condicoes iniciais e cria os ciclistas
@@ -43,15 +52,14 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
 static void show_help(char *programName)
 {
     fprintf(stderr, "%s: Uso \n"
                     "prompt> %s tamanho-do-velodromo ciclistas [d]\n"
                     "[d] = argumento opcional para habilitar debug\n"
-                    ,
+                    "[filename.txt] = argumento opcional para output\n",
             programName, programName);
-    exit (EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }
 
 void escreve_placar(FILE *output)
@@ -60,9 +68,10 @@ void escreve_placar(FILE *output)
     fprintf(output, "\nRanqueamento Final:\n");
     for (int i = 1; i <= ciclists_number; i++)
     {
-        if (ranking_final[i] == 0) continue;
+        if (ranking_final[i] == 0)
+            continue;
         idAtual = ranking_final[i];
-        fprintf(output, "%d: Ciclista %d - %.2f segundos\n", posAtual, idAtual, (float)ciclistas[idAtual]->time_running/1000);
+        fprintf(output, "%d: Ciclista %d - %.2f segundos\n", posAtual, idAtual, (float)ciclistas[idAtual]->time_running / 1000);
 
         posAtual++;
     }
@@ -70,7 +79,7 @@ void escreve_placar(FILE *output)
 
     for (int i = 1; i <= ciclists_number; i++)
     {
-        if (ciclistas[i]->quebrou) fprintf(output, "Ciclista %d quebrou na volta %d - %.2f segundos\n", i, ciclistas[i]->laps, (float)ciclistas[i]->time_running/1000);
+        if (ciclistas[i]->quebrou)
+            fprintf(output, "Ciclista %d quebrou na volta %d - %.2f segundos\n", i, ciclistas[i]->laps, (float)ciclistas[i]->time_running / 1000);
     }
-   
 }

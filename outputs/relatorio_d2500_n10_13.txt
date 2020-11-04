@@ -1,0 +1,29 @@
+Volta 1: 5 3 4 2 1 10 9 7 8 6
+Volta 2: 2 4 5 7 6 10 1 3 8 9
+Volta 3: 2 4 5 7 10 6 1 3 8
+Volta 4: 4 2 7 10 5 6 3 1 8
+Volta 5: 4 7 10 2 5 1 6 3
+Volta 6: 4 2 5 10 7 1 3
+Volta 7: 2 4 7 10 5 1
+Volta 8: 4 10 5 2 7 1
+Volta 9: 10 4 5 2 7
+Volta 10: 2 4 10 7 5
+Volta 11: 4 2 10 7
+Volta 12: 2 10 4 7
+Volta 13: 10 2 4
+Volta 14: 10 2 4
+Volta 15: 10 2
+Volta 16: 10 2
+
+Ranqueamento Final:
+1: Ciclista 2 - 3150.06 segundos
+2: Ciclista 10 - 2850.18 segundos
+3: Ciclista 4 - 2850.06 segundos
+4: Ciclista 7 - 2400.18 segundos
+5: Ciclista 5 - 2100.06 segundos
+6: Ciclista 1 - 1800.06 segundos
+7: Ciclista 3 - 1650.06 segundos
+8: Ciclista 8 - 1050.18 segundos
+9: Ciclista 9 - 600.18 segundos
+
+Ciclista 6 quebrou na volta 6 - 1350.12 segundos

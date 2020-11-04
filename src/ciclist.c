@@ -19,10 +19,10 @@ void create(int x, int y)
     c->finishedLap = false;
     c->x_pos = x;
     c->y_pos = y;
-    if(pthread_create(&c->thread, NULL, run, c) != 0)
+    if (pthread_create(&c->thread, NULL, run, c) != 0)
     {
-        fprintf(stderr, "erro na criação do ciclista %d\n", c->id);
-        exit (EXIT_FAILURE);
+        fprintf(stderr, "Erro na criação do ciclista %d\n", c->id);
+        exit(EXIT_FAILURE);
     }
 
     pista[x][y] = c->id;
@@ -32,7 +32,8 @@ void create(int x, int y)
 void elimina(ciclist_ptr c)
 {
     pthread_mutex_lock(&pistaMutex[c->x_pos][c->y_pos]);
-    if (pista[c->x_pos][c->y_pos] == c->id) pista[c->x_pos][c->y_pos] = 0;
+    if (pista[c->x_pos][c->y_pos] == c->id)
+        pista[c->x_pos][c->y_pos] = 0;
     pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
 
     pthread_mutex_lock(&nCiclistMutex);
@@ -42,7 +43,8 @@ void elimina(ciclist_ptr c)
 
     c->running = false;
     c->time_running = current_time;
-    if (c->quebrou) return;
+    if (c->quebrou)
+        return;
     ranking_final[c->rank] = c->id;
 }
 
@@ -57,30 +59,36 @@ void move_to(ciclist_ptr c, int x, int y)
 
 void *run(void *ciclist)
 {
-    ciclist_ptr c = (ciclist_ptr) ciclist;
+    ciclist_ptr c = (ciclist_ptr)ciclist;
     int sixthMeter = 0;
 
-    while (c->running) {
-        while (cont[c->id] == 0) usleep(10); //Quantia de sleep apenas para testes
+    while (c->running)
+    {
+        while (cont[c->id] == 0)
+            usleep(10); //Quantia de sleep apenas para testes
         cont[c->id] = 0;
-        if (!c->running) break; //Para caso seja eliminado com a thread parada acima
-        
-        sixthMeter += c->speed*time_interval/600;
-        if (sixthMeter >= 6){
+        if (!c->running)
+            break; //Para caso seja eliminado com a thread parada acima
+
+        sixthMeter += c->speed * time_interval / 600;
+        if (sixthMeter >= 6)
+        {
             /*Codigo para passar para a próxima faixa*/
             if (avanca_metro(c))
             {
                 sixthMeter = 0;
-                if (c->x_pos == 0){
+                if (c->x_pos == 0)
+                {
                     c->laps++;
-                    if (c->laps > 0) 
+                    if (c->laps > 0)
                     {
                         if (quebrou(c))
                         {
                             c->quebrou = true;
 
                             pthread_mutex_lock(&mutexPlacar);
-                            for (int i = c->laps; i <= 2*ciclists_number; i++) placar[i][0]--;
+                            for (int i = c->laps; i <= 2 * ciclists_number; i++)
+                                placar[i][0]--;
                             pthread_mutex_unlock(&mutexPlacar);
 
                             pthread_mutex_lock(&mutexUL);
@@ -112,14 +120,15 @@ void *run(void *ciclist)
 
 void anda_para_esquerda(ciclist_ptr c)
 {
-    if (!c->running) return;
+    if (!c->running)
+        return;
     int idAtual, y_ant;
     y_ant = c->y_pos;
     pthread_mutex_lock(&pistaMutex[c->x_pos][y_ant]);
     for (int i = 0; i < c->y_pos; i++)
     {
         if (pthread_mutex_trylock(&pistaMutex[c->x_pos][i]) == 0)
-        {    
+        {
             idAtual = pista[c->x_pos][i];
             if (idAtual == 0)
             {
@@ -138,8 +147,8 @@ bool avanca_metro(ciclist_ptr c)
 {
     /*    
     Primeiro travo o meu mutex, depois o da frente (posso pensar em usar o trylock)*/
-    int x_front = (c->x_pos+1)%velodromo_length;
-    
+    int x_front = (c->x_pos + 1) % velodromo_length;
+
     pthread_mutex_lock(&pistaMutex[c->x_pos][c->y_pos]);
     pthread_mutex_lock(&pistaMutex[x_front][c->y_pos]);
     int idAFrente = pista[x_front][c->y_pos];
@@ -168,10 +177,10 @@ bool avanca_metro(ciclist_ptr c)
         int andou = arrive[idAFrente];
         pthread_mutex_unlock(&mArrive[idAFrente]);
 
-        if (andou == 0) 
+        if (andou == 0)
         {
             pthread_mutex_unlock(&pistaMutex[x_front][c->y_pos]);
-        
+
             //Espera ocupada
             while (andou == 0)
             {
@@ -191,7 +200,7 @@ bool avanca_metro(ciclist_ptr c)
             pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
             return true;
         }
-        
+
         //Ciclista na frente que já andou, libero o mutex
         pthread_mutex_unlock(&pistaMutex[x_front][c->y_pos]);
 
@@ -210,7 +219,6 @@ bool avanca_metro(ciclist_ptr c)
         pthread_mutex_unlock(&pistaMutex[c->x_pos][c->y_pos]);
     }
     return false;
-    
 }
 
 bool espaco_lado(int x, int y)
@@ -220,10 +228,10 @@ bool espaco_lado(int x, int y)
     {
         //pthread_mutex_lock(&pistaMutex[x][i]);
         if (pthread_mutex_trylock(&pistaMutex[x][i]) == 0)
-        {    
+        {
             idAtual = pista[x][i];
             if (idAtual == 0)
-            { 
+            {
                 pthread_mutex_unlock(&pistaMutex[x][i]);
                 return true;
             }
@@ -235,7 +243,7 @@ bool espaco_lado(int x, int y)
 
 int espaco_frente(int x, int y)
 {
-    int x_front = (x+1)%velodromo_length;
+    int x_front = (x + 1) % velodromo_length;
     int idAtual;
     //Não sei se devo ocmeçar em y ou em 0
     for (int i = y; i < velodromo_width; i++)
@@ -246,7 +254,8 @@ int espaco_frente(int x, int y)
         if (pthread_mutex_trylock(&pistaMutex[x_front][i]) == 0)
         {
             idAtual = pista[x_front][i];
-            if (idAtual == 0) return i;
+            if (idAtual == 0)
+                return i;
             pthread_mutex_unlock(&pistaMutex[x_front][i]);
         }
     }
@@ -255,16 +264,17 @@ int espaco_frente(int x, int y)
 
 void atualiza_velocidade(ciclist_ptr c)
 {
-    if (c->speed == LOW_SPEED && rand()%100 < 80)
+    if (c->speed == LOW_SPEED && rand() % 100 < 80)
         c->speed = AVG_SPEED;
 
-    else if (c->speed == AVG_SPEED && rand()%100 < 40)
+    else if (c->speed == AVG_SPEED && rand() % 100 < 40)
         c->speed = LOW_SPEED;
 }
 
 bool quebrou(ciclist_ptr c)
 {
-    if (c->laps % 6 != 0) return false;
+    if (c->laps % 6 != 0)
+        return false;
 
     pthread_mutex_lock(&nCiclistMutex);
     if (running_ciclists <= 5)
@@ -274,11 +284,10 @@ bool quebrou(ciclist_ptr c)
     }
     pthread_mutex_unlock(&nCiclistMutex);
 
-    if (rand()%100 < 5)
+    if (rand() % 100 < 5)
     {
         fprintf(stderr, "O ciclista %d quebrou após %d voltas\n", c->id, c->laps);
         return true;
     }
     return false;
-
 }

@@ -1,0 +1,17 @@
+15.91 segundos, 1568 Kilobytes
+12.45 segundos, 1592 Kilobytes
+13.29 segundos, 1572 Kilobytes
+21.81 segundos, 1568 Kilobytes
+23.18 segundos, 1572 Kilobytes
+25.70 segundos, 1572 Kilobytes
+16.84 segundos, 1584 Kilobytes
+16.38 segundos, 1584 Kilobytes
+16.70 segundos, 1580 Kilobytes
+13.04 segundos, 1580 Kilobytes
+23.67 segundos, 1564 Kilobytes
+29.61 segundos, 1576 Kilobytes
+17.14 segundos, 1568 Kilobytes
+17.30 segundos, 1572 Kilobytes
+18.81 segundos, 1568 Kilobytes
+Command terminated by signal 11
+20.85 segundos, 1556 Kilobytes
